@@ -1,0 +1,18 @@
+{
+  "reporter": [
+    "html",
+    "lcov",
+    "text-summary"
+  ],
+  "extension": [
+    ".ts"
+  ],
+  "exclude": [
+    "**/*.d.ts",
+    "test",
+    "coverage",
+    ".nyc_output",
+    "log"
+  ],
+  "all": true
+}
