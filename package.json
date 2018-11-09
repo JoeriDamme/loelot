@@ -1,0 +1,22 @@
+{
+  "name": "loelot",
+  "version": "1.0.0",
+  "description": "loelot project",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoeriDamme/loelot.git"
+  },
+  "keywords": [
+    "loelot"
+  ],
+  "author": "Joeri Damme",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JoeriDamme/loelot/issues"
+  },
+  "homepage": "https://github.com/JoeriDamme/loelot#readme"
+}
