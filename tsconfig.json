@@ -6,5 +6,7 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
