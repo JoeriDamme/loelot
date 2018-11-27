@@ -1,7 +1,10 @@
 /* tslint:disable:no-console */
 import config from 'config';
+import dotenv from 'dotenv';
 import http from 'http';
 import App from './app';
+
+dotenv.config();
 
 const app: App = new App();
 const server: http.Server = app.start();
