@@ -1,8 +1,10 @@
 import express, { Router } from 'express';
 import http from 'http';
+import passport from 'passport';
 import Authentication from './lib/authentication';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
+import { userRoutes } from './routes/user.routes';
 
 interface IApplicationRouter {
   handler: Router;
@@ -43,6 +45,11 @@ export default class App {
         handler: authenticationRoutes,
         middleware: [],
         path: '/api',
+      },
+      {
+        handler: userRoutes,
+        middleware: [Authentication.validateJWT],
+        path: '/api/v1/users',
       },
     ];
 
