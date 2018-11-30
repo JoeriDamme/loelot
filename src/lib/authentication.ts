@@ -102,7 +102,7 @@ export default class Authentication {
         const user: User|null = await User.findByPrimary(jwtPayload.data.uuid);
 
         if (!user) {
-          throw new Error('Invalid JWT!');
+          throw new UnauthorizedError('Could not find user in token');
         }
 
         return callback(null, user);

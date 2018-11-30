@@ -16,23 +16,21 @@ describe('/api/auth', () => {
   describe('GET /facebook', () => {
     it('should reply with error when no access_token in header', async () => {
       const response: any = await request(expressApp).get(`${uri}/facebook`);
-      expect(response.status).to.eq(400);
+      expect(response.status).to.equal(401);
       expect(response.body).to.deep.equal({
-        errors: [],
         message: 'You should provide access_token',
-        name: 'BadRequestError',
-        status: 400,
+        name: 'UnauthorizedError',
+        status: 401,
       });
     });
 
     it('should reply with error when invalid access_token in header', async () => {
       const response: any = await request(expressApp).get(`${uri}/facebook`).set('Authorization', 'Bearer xxx');
-      expect(response.status).to.eq(400);
+      expect(response.status).to.equal(401);
       expect(response.body).to.deep.equal({
-        errors: [],
         message: 'Failed to fetch user profile',
-        name: 'BadRequestError',
-        status: 400,
+        name: 'UnauthorizedError',
+        status: 401,
       });
     });
 

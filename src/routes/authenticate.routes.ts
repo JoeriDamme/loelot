@@ -3,6 +3,7 @@ import nock from 'nock';
 import passport from 'passport';
 import Authentication from '../lib/authentication';
 import BadRequestError from '../lib/errors/bad-request.error';
+import UnauthorizedError from '../lib/errors/unauthorized.error';
 // nock.recorder.rec();
 export const authenticationRoutes: Router = Router()
   .get('/facebook', (request: Request, response: Response, next: NextFunction) => {
@@ -10,11 +11,11 @@ export const authenticationRoutes: Router = Router()
       session: false,
     }, (err: Error, user: any, info: any) => {
       if (err) {
-        const badRequestError: BadRequestError = new BadRequestError(err.message);
-        return response.status(badRequestError.status).json(badRequestError);
+        const unauthorized: UnauthorizedError = new UnauthorizedError(err.message);
+        return response.status(unauthorized.status).json(unauthorized);
       } else if (info) {
-        const badRequestError: BadRequestError = new BadRequestError(info.message);
-        return response.status(badRequestError.status).json(badRequestError);
+        const unauthorized: UnauthorizedError = new UnauthorizedError(info.message);
+        return response.status(unauthorized.status).json(unauthorized);
       }
 
       const token: string = Authentication.generateJWT(user);
