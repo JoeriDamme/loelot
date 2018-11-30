@@ -23,6 +23,6 @@ before(async () => {
       return model.destroy({ truncate: true });
     });
   } catch (error) {
-    console.error({error});
+    console.error({error}); // tslint:disable-line
   }
 });
