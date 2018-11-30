@@ -1,9 +1,11 @@
+import config from 'config';
 import { NextFunction, Request, Response } from 'express';
 import jwt, { Secret } from 'jsonwebtoken';
 import passport from 'passport';
 import FacebookTokenStrategy, { Profile, VerifyFunction } from 'passport-facebook-token';
 import { ExtractJwt, Strategy as JWTStrategy, VerifiedCallback } from 'passport-jwt';
 import User from '../models/user.model';
+import UnauthorizedError from './errors/unauthorized.error';
 
 interface IJWTPayload {
   data: {
@@ -22,13 +24,41 @@ export default class Authentication {
   public static generateJWT(user: User): string {
     return jwt.sign({
       data: user.toJSON(),
-    }, process.env.JWT_SECRET as Secret, {
+    }, Authentication.getJWTSecret(), {
       expiresIn: '4w',
     });
   }
 
   public static validateJWT(request: Request, response: Response, next: NextFunction): void {
-    return passport.authenticate('jwt', { session : false })(request, response, next);
+    return passport.authenticate('jwt', {
+      session : false,
+    }, (error: Error, user: User, info: any) => {
+      if (error) {
+        const unauthorized: UnauthorizedError = new UnauthorizedError(error.message);
+        return response.status(unauthorized.status).json(unauthorized);
+      } else if (info) {
+        const unauthorized: UnauthorizedError = new UnauthorizedError(info.message);
+        return response.status(unauthorized.status).json(unauthorized);
+      }
+      request.user = user;
+      return next();
+    })(request, response, next);
+  }
+
+  /**
+   * Return JWT secret based on environment.
+   */
+  private static getJWTSecret(): string {
+    if (process.env.NODE_ENV !== 'production') {
+      return config.get('jwt.secret');
+    }
+
+    const secret: string = process.env.JWT_SECRET || config.get('jwt.secret');
+    if (!process.env.JWT_SECRET) {
+      // TODO: logger warning
+    }
+
+    return secret;
   }
 
   public initialize(): any {
@@ -66,7 +96,7 @@ export default class Authentication {
   private getJWTStrategy(): JWTStrategy {
     return new JWTStrategy({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: Authentication.getJWTSecret(),
     }, async (jwtPayload: IJWTPayload, callback: any): Promise<VerifiedCallback> => {
       try {
         const user: User|null = await User.findByPrimary(jwtPayload.data.uuid);

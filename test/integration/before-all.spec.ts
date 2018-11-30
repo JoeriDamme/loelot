@@ -2,12 +2,13 @@ import bluebird from 'bluebird';
 import dotenv from 'dotenv';
 dotenv.config();
 import config from 'config';
-import { Sequelize, Model } from 'sequelize-typescript';
+import { Sequelize } from 'sequelize-typescript';
 
 const sequelize: Sequelize = new Sequelize({
   database: config.get('database.name') as string,
   dialect: process.env.DB_DIALECT as string,
   host: process.env.DB_HOST as string,
+  logging: false,
   modelPaths: [`${__dirname}/../../src/models/*.model.ts`],
   operatorsAliases: Sequelize.Op as any,
   password: process.env.DB_PASS as string,

@@ -4,5 +4,8 @@
   },
   "server": {
     "port": 5555
+  },
+  "jwt": {
+    "secret": "stealme"
   }
 }
