@@ -1,4 +1,7 @@
 {
+  "database": {
+    "name": "loelot"
+  },
   "server": {
     "port": 5555
   }

@@ -1,7 +1,8 @@
+import config from 'config';
 import { Sequelize } from 'sequelize-typescript';
 
 export default new Sequelize({
-  database: process.env.DB_NAME as string,
+  database: config.get('database.name') as string,
   dialect: process.env.DB_DIALECT as string,
   host: process.env.DB_HOST as string,
   modelPaths: [`${__dirname}/../models/*.model.ts`],

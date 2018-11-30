@@ -1,7 +1,9 @@
-import express, { Router } from 'express';
+import bodyParser from 'body-parser';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import http from 'http';
-import passport from 'passport';
 import Authentication from './lib/authentication';
+import ApplicationError from './lib/errors/application.error';
+import EndpointNotFoundError from './lib/errors/endpoint-not-found.error';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
 import { userRoutes } from './routes/user.routes';
@@ -34,6 +36,13 @@ export default class App {
   /**
    *
    */
+  public getExpressApplication(): Express.Application {
+    return this.app;
+  }
+
+  /**
+   *
+   */
   private setRoutes(): void {
     const routes: IApplicationRouter[] = [
       {
@@ -44,7 +53,7 @@ export default class App {
       {
         handler: authenticationRoutes,
         middleware: [],
-        path: '/api',
+        path: '/api/auth',
       },
       {
         handler: userRoutes,
@@ -54,12 +63,24 @@ export default class App {
     ];
 
     routes.forEach((route: IApplicationRouter) => this.app.use(route.path, route.middleware, route.handler));
+
+    this.app.use((request: Request, response: Response, next: NextFunction) => {
+      const error: EndpointNotFoundError = new EndpointNotFoundError();
+      return response.status(error.status).json(error);
+    });
+
+    this.app.use((err: Error, request: Request, response: Response, next: NextFunction) => {
+      const expose: ApplicationError = new ApplicationError(err.message);
+      return response.status(expose.status).json(expose);
+    });
   }
 
   /**
    *
    */
   private setExpressConfiguration(): void {
+    this.app.use(bodyParser.urlencoded({extended: true}));
+    this.app.use(bodyParser.json());
     return;
   }
 
