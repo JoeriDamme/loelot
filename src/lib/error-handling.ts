@@ -3,18 +3,21 @@ import ApplicationError from './errors/application.error';
 import BadRequestError, { IBadRequestErrors } from './errors/bad-request.error';
 
 export default class ErrorHandler {
-  public error: Error;
+  public error: any;
 
-  constructor(error: Error) {
+  constructor(error: any) {
     this.error = error;
-    // TODO: logging!
     // console.error(this.error); // tslint:disable-line
   }
 
   public getClientError(): ApplicationError {
     if (this.error instanceof SequelizeValidationError.ValidationError) {
       return new BadRequestError('Validation error', this.getErrorsSequelizeValidationError());
+    } else if (this.error instanceof ApplicationError) {
+      // the error has already been handled
+      return this.error;
     }
+
     return new ApplicationError('Something went wrong. Please try again');
   }
 

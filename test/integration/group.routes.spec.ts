@@ -74,6 +74,57 @@ describe(uri, () => {
     });
   });
 
+  describe('GET /:uuid', () => {
+    it('should return a resource', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.lol.nl/4.png',
+        name: 'Hey',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.include(group);
+      expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
+      'createdAt');
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return an error if resource not found', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/43bbb558-8fce-43d7-9e88-faa1581fd3ee`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Resource not found with UUID: 43bbb558-8fce-43d7-9e88-faa1581fd3ee',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
+    });
+
+    it('should return an error if uuid is invalid', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/aabbcc`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Invalid format UUID: aabbcc',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
+    });
+  });
+
   describe('POST /', () => {
     it('should ignore data and uuid ', async () => {
       const group: any = {

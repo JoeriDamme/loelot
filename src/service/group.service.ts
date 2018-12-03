@@ -23,4 +23,12 @@ export default class GroupService {
   public static async query(): Promise<Group[]> {
     return Group.findAll();
   }
+
+  /**
+   * Find Group by UUID.
+   * @param uuid
+   */
+  public static async findByPk(uuid: string): Promise<Group|null> {
+    return Group.findByPrimary(uuid);
+  }
 }
