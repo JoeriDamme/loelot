@@ -15,4 +15,12 @@ export default class GroupService {
   public static async create(data: IGroupAttributes): Promise<Group> {
     return Group.create(data);
   }
+
+  /**
+   * Get all groups.
+   * TODO: extend with query parameters.
+   */
+  public static async query(): Promise<Group[]> {
+    return Group.findAll();
+  }
 }

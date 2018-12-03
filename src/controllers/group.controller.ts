@@ -27,4 +27,19 @@ export default class GroupController {
       return next(error);
     }
   }
+
+  /**
+   * GET all the Groups from the database.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async query(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const resources: Group[] = await GroupService.query();
+      return response.json(resources);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }

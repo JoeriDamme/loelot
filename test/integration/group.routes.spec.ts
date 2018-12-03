@@ -1,9 +1,11 @@
+import bluebird from 'bluebird';
 import { expect } from 'chai';
 import moment from 'moment';
 import request from 'supertest';
 import validateUuid from 'uuid-validate';
 import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
+import Group from '../../src/models/group.model';
 import User from '../../src/models/user.model';
 
 const uri: string = '/api/v1/groups';
@@ -29,6 +31,49 @@ describe(uri, () => {
     token = Authentication.generateJWT(user);
   });
 
+  describe('GET /', () => {
+    it('should return all groups', async () => {
+      // let's insert two groups
+      const groups: any = [
+        {
+          adminUuid: user.get('uuid'),
+          creatorUuid: user.get('uuid'),
+          icon: 'http://www.kek.nl/1.png',
+          name: 'Groep 1',
+        },
+        {
+          adminUuid: user.get('uuid'),
+          creatorUuid: user.get('uuid'),
+          icon: 'http://www.kek.nl/2.png',
+          name: 'Groep 2',
+        },
+      ];
+
+      await bluebird.each(groups, async (group: any) => Group.create(group));
+
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.length(2);
+      response.body.forEach((group: any) => {
+        expect(group).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt', 'createdAt');
+        expect(moment(group.createdAt).isValid()).to.be.true;
+        expect(moment(group.updatedAt).isValid()).to.be.true;
+        expect(validateUuid(group.uuid, 4)).to.be.true;
+      });
+      expect(response.body[0]).to.include(Object.assign({
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+      }, groups[0]));
+      expect(response.body[1]).to.include(Object.assign({
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+      }, groups[1]));
+    });
+  });
+
   describe('POST /', () => {
     it('should ignore data and uuid ', async () => {
       const group: any = {
@@ -51,7 +96,7 @@ describe(uri, () => {
         creatorUuid: user.get('uuid'),
       }, group));
       expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
-      'createdAt');
+        'createdAt');
       expect(response.body.uuid).to.not.equal('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
