@@ -1,3 +1,4 @@
+import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 
 export interface IGroupAttributes {
@@ -30,5 +31,20 @@ export default class GroupService {
    */
   public static async findByPk(uuid: string): Promise<Group|null> {
     return Group.findByPrimary(uuid);
+  }
+
+  public static async update(data: IGroupAttributes, uuid: string): Promise<Group> {
+    await Group.update(data, {
+      where: {
+        uuid,
+      },
+    });
+    const group: Group|null = await Group.findByPrimary(uuid);
+
+    if (!group) {
+      throw new ApplicationError('Error fetching resource after update');
+    }
+
+    return group;
   }
 }

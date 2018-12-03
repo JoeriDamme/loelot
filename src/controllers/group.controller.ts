@@ -53,6 +53,12 @@ export default class GroupController {
     return response.json(request.resource);
   }
 
+  /**
+   * Find Group by primary key.
+   * @param request
+   * @param response
+   * @param next
+   */
   // tslint:disable-next-line:max-line-length
   public static async findByPK(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
@@ -66,6 +72,22 @@ export default class GroupController {
       }
       request.resource = resource;
       return next();
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Update Group
+   * @param request
+   * @param response
+   * @param next
+   */
+  // tslint:disable-next-line:max-line-length
+  public static async update(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const resource: Group = await GroupService.update(request.body, request.resource.get('uuid'));
+      response.json(resource);
     } catch (error) {
       return next(error);
     }

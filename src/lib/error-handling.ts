@@ -13,6 +13,8 @@ export default class ErrorHandler {
   public getClientError(): ApplicationError {
     if (this.error instanceof SequelizeValidationError.ValidationError) {
       return new BadRequestError('Validation error', this.getErrorsSequelizeValidationError());
+    } else if (this.error instanceof SequelizeValidationError.ForeignKeyConstraintError) {
+      return new BadRequestError('Validation error', this.getErrorsSequelizeConstraintError());
     } else if (this.error instanceof ApplicationError) {
       // the error has already been handled
       return this.error;
@@ -27,5 +29,13 @@ export default class ErrorHandler {
       message: e.message,
       property: e.path,
     }));
+  }
+
+  private getErrorsSequelizeConstraintError(): IBadRequestErrors[] {
+    const sequelizeConstraintError: any = JSON.parse(JSON.stringify(this.error));
+    return [{
+      message: 'Unknown UUID',
+      property: sequelizeConstraintError.parent.detail.split('(')[1].split(')')[0],
+    }];
   }
 }

@@ -46,9 +46,13 @@ export default class User extends Model<User> {
   @Column
   public email: string;
 
-  @HasMany(() => Group)
+  @HasMany(() => Group, {
+    foreignKey: 'adminUuid',
+  })
   public groupAdmin: Group[];
 
-  @HasMany(() => Group)
+  @HasMany(() => Group, {
+    foreignKey: 'creatorUuid',
+  })
   public groupCreator: Group[];
 }
