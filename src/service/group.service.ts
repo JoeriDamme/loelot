@@ -1,5 +1,3 @@
-import BadRequestError from '../lib/errors/bad-request.error';
-import { SequelizeUtils } from '../lib/sequelize';
 import Group from '../models/group.model';
 
 export interface IGroupAttributes {
