@@ -1,6 +1,6 @@
 import ApplicationError from './application.error';
 
-interface IBadRequestErrors {
+export interface IBadRequestErrors {
   message: string;
   property: string;
 }

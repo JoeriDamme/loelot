@@ -7,22 +7,30 @@ const sequelize: Sequelize = new Sequelize({
   database: config.get('database.name') as string,
   dialect: process.env.DB_DIALECT as string,
   host: process.env.DB_HOST as string,
-  logging: false,
-  modelPaths: [`${__dirname}/../../src/models/*.model.ts`],
+  modelPaths: [`${__dirname}/../src/models/*.model.ts`],
   operatorsAliases: Sequelize.Op as any,
   password: process.env.DB_PASS as string,
   port: Number(process.env.DB_PORT),
-  timezone: '+01:00',
   username: process.env.DB_USER as string,
 });
 
-before(async () => {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync({
-      force: true,
-    });
-  } catch (error) {
-    console.error({error}); // tslint:disable-line
+class Sync {
+  public static async init(): Promise<void> {
+    try {
+      await sequelize.authenticate();
+      await sequelize.sync({
+        force: true,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
+}
+
+Sync.init().then(() => {
+  console.log('synced!'); // tslint:disable-line
+  process.exit(0);
+}, (err: Error) => {
+  console.log(err); // tslint:disable-line
+  process.exit(1);
 });

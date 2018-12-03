@@ -2,10 +2,12 @@ import bodyParser from 'body-parser';
 import express, { NextFunction, Request, Response, Router } from 'express';
 import http from 'http';
 import Authentication from './lib/authentication';
+import ErrorHandler from './lib/error-handling';
 import ApplicationError from './lib/errors/application.error';
 import EndpointNotFoundError from './lib/errors/endpoint-not-found.error';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
+import { groupRoutes } from './routes/group.routes';
 import { userRoutes } from './routes/user.routes';
 
 interface IApplicationRouter {
@@ -60,6 +62,11 @@ export default class App {
         middleware: [Authentication.validateJWT],
         path: '/api/v1/users',
       },
+      {
+        handler: groupRoutes,
+        middleware: [Authentication.validateJWT],
+        path: '/api/v1/groups',
+      },
     ];
 
     routes.forEach((route: IApplicationRouter) => this.app.use(route.path, route.middleware, route.handler));
@@ -70,8 +77,8 @@ export default class App {
     });
 
     this.app.use((err: Error, request: Request, response: Response, next: NextFunction) => {
-      const expose: ApplicationError = new ApplicationError(err.message);
-      return response.status(expose.status).json(expose);
+      const clientError: ApplicationError = new ErrorHandler(err).getClientError();
+      return response.status(clientError.status).json(clientError);
     });
   }
 
