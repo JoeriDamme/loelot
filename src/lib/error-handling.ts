@@ -7,7 +7,8 @@ export default class ErrorHandler {
 
   constructor(error: Error) {
     this.error = error;
-    console.error(this.error); // tslint:disable-line
+    // TODO: logging!
+    // console.error(this.error); // tslint:disable-line
   }
 
   public getClientError(): ApplicationError {
