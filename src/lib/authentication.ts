@@ -99,7 +99,7 @@ export default class Authentication {
       secretOrKey: Authentication.getJWTSecret(),
     }, async (jwtPayload: IJWTPayload, callback: any): Promise<VerifiedCallback> => {
       try {
-        const user: User|null = await User.findByPrimary(jwtPayload.data.uuid);
+        const user: User|null = await User.findByPk(jwtPayload.data.uuid);
 
         if (!user) {
           throw new UnauthorizedError('Could not find user in token');

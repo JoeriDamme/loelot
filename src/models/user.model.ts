@@ -1,15 +1,17 @@
-import {
-  AllowNull, AutoIncrement, Column, DataType,
-  IsEmail, IsUUID, Length, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import Sequelize from 'sequelize';
+import { AllowNull, BelongsToMany, Column, DataType, HasMany, IsEmail, Length, Model, Table } from 'sequelize-typescript';
+import Group from './group.model';
+import GroupUser from './groupuser.model';
 
 @Table({
   timestamps: true,
 })
 export default class User extends Model<User> {
-  @IsUUID(4)
-  @PrimaryKey
-  @AutoIncrement // need this, otherwise INSERT INTO will include try to insert NULL value on Primary Key
-  @Column(DataType.UUIDV4)
+  @Column({
+    defaultValue: Sequelize.fn('uuid_generate_v4'),
+    primaryKey: true,
+    type: DataType.UUID,
+  })
   public uuid: string;
 
   @AllowNull(false)
@@ -44,4 +46,17 @@ export default class User extends Model<User> {
   @IsEmail
   @Column
   public email: string;
+
+  @HasMany(() => Group, {
+    foreignKey: 'adminUuid',
+  })
+  public groupAdmin: Group[];
+
+  @HasMany(() => Group, {
+    foreignKey: 'creatorUuid',
+  })
+  public groupCreator: Group[];
+
+  @BelongsToMany(() => Group, () => GroupUser)
+  public groups: Group[];
 }

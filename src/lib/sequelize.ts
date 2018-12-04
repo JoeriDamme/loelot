@@ -9,5 +9,6 @@ export default new Sequelize({
   operatorsAliases: Sequelize.Op as any,
   password: process.env.DB_PASS as string,
   port: Number(process.env.DB_PORT),
+  timezone: '+01:00',
   username: process.env.DB_USER as string,
 });

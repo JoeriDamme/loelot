@@ -9,7 +9,8 @@
     "test:unit": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/unit/**/*.spec.ts'",
     "test:integration": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/integration/**/*.spec.ts'",
     "dev": "nodemon",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'"
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "sync": "cross-env NODE_ENV=production ts-node script/sync.ts"
   },
   "pre-commit": [
     "lint",
@@ -39,12 +40,14 @@
     "@types/passport": "^0.4.7",
     "@types/passport-facebook-token": "^0.4.33",
     "@types/passport-jwt": "^3.0.1",
+    "@types/uuid-validate": "0.0.0",
     "bluebird": "^3.5.3",
     "body-parser": "^1.18.3",
     "config": "^2.0.1",
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.4.0",
+    "moment": "^2.22.2",
     "passport": "^0.4.0",
     "passport-facebook-token": "^3.3.0",
     "passport-jwt": "^4.0.0",
@@ -52,9 +55,10 @@
     "pg-hstore": "^2.3.2",
     "reflect-metadata": "^0.1.12",
     "sequelize": "^4.41.2",
-    "sequelize-typescript": "^0.6.6",
+    "sequelize-typescript": "0.6.7-beta.1",
     "ts-node": "^7.0.1",
-    "typescript": "^3.1.6"
+    "typescript": "^3.1.6",
+    "uuid-validate": "0.0.3"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",

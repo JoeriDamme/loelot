@@ -48,8 +48,6 @@ describe('/api/v1/users', () => {
     });
 
     it('should reply with profile of user', async () => {
-      // Let's create a JWT token only for testing the JWT strategy.
-      // For others the authentication method will be stubbed.
       const user: User = await User.create({
         displayName: 'John Doe',
         email: 'johndoe@gmail.com',
