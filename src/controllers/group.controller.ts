@@ -106,4 +106,13 @@ export default class GroupController {
       return next(error);
     }
   }
+
+  public static async delete(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      await GroupService.delete(request.resource.get('uuid'));
+      return response.status(204).json();
+    } catch (error) {
+      return next(error);
+    }
+  }
 }

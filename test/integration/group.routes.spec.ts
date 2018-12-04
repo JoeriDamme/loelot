@@ -451,4 +451,26 @@ describe(uri, () => {
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
+
+  describe('DELETE /:uuid', () => {
+    it('should delete group', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.x.com/egewg.png',
+        name: 'lol',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(204);
+      expect(response.body).to.deep.equal({});
+      const test: Group|null = await Group.findByPrimary(resource.get('uuid'));
+      expect(test).to.be.null;
+    });
+  });
 });

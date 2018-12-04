@@ -47,4 +47,18 @@ export default class GroupService {
 
     return group;
   }
+
+  /**
+   * Delete Group with UUID.
+   * @param uuid
+   */
+  public static async delete(uuid: string): Promise<void> {
+    await Group.destroy({
+      where: {
+        uuid,
+      },
+    });
+
+    return;
+  }
 }
