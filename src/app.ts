@@ -1,10 +1,12 @@
 import bodyParser from 'body-parser';
 import express, { NextFunction, Request, Response, Router } from 'express';
 import http from 'http';
+import morgan from 'morgan';
 import Authentication from './lib/authentication';
 import ErrorHandler from './lib/error-handling';
 import ApplicationError from './lib/errors/application.error';
 import EndpointNotFoundError from './lib/errors/endpoint-not-found.error';
+import { logger, morganOption } from './lib/winston';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
 import { groupRoutes } from './routes/group.routes';
@@ -72,11 +74,13 @@ export default class App {
     routes.forEach((route: IApplicationRouter) => this.app.use(route.path, route.middleware, route.handler));
 
     this.app.use((request: Request, response: Response, next: NextFunction) => {
+      logger.error(`404 - ${request.originalUrl} - ${request.method} - ${request.ip}`);
       const error: EndpointNotFoundError = new EndpointNotFoundError();
       return response.status(error.status).json(error);
     });
 
-    this.app.use((err: Error, request: Request, response: Response, next: NextFunction) => {
+    this.app.use((err: any, request: Request, response: Response, next: NextFunction) => {
+      logger.error(`${err.status || 500} - ${err.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
       const clientError: ApplicationError = new ErrorHandler(err).getClientError();
       return response.status(clientError.status).json(clientError);
     });
@@ -86,6 +90,7 @@ export default class App {
    *
    */
   private setExpressConfiguration(): void {
+    this.app.use(morgan('combined', morganOption));
     this.app.use(bodyParser.urlencoded({extended: true}));
     this.app.use(bodyParser.json());
     return;
