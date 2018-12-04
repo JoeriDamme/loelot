@@ -6,4 +6,5 @@ export const groupRoutes: Router = Router()
   .get('/', GroupController.query)
   .get('/:uuid', GroupController.read)
   .put('/:uuid', GroupController.checkAllPropertiesAreSet, GroupController.update)
+  .patch('/:uuid', GroupController.update)
   .param('uuid', GroupController.findByPK);

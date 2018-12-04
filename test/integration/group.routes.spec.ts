@@ -344,4 +344,111 @@ describe(uri, () => {
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
+
+  describe('PATCH /:uuid', () => {
+
+    it('should give error on invalid data', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.keke.com/test.png',
+        name: 'the name',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      const updateGroup: any = {
+        name: 'u'.repeat(60),
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateGroup);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'Validation len on name failed', property: 'name' },
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should give error on invalid foreign key', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.imgur.com/test.png',
+        name: 'lol',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      const updateGroup: any = {
+        adminUuid: 'dc9bdceb-8a0c-437b-ad2a-81e2ffa68807',
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateGroup);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'Unknown UUID', property: 'adminUuid' },
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should patch resource', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.x.com/blob.png',
+        name: 'lol',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      const patchUser: User = await User.create({
+        displayName: 'x y',
+        email: 'xxxx@gmail.com',
+        firstName: 'x',
+        lastName: 'y',
+      });
+
+      const updateGroup: any = {
+        adminUuid: patchUser.get('uuid'),
+        name: 'new name',
+        uuid: '2f9db767-3019-4120-a07e-1d79da925021', // should be ignored
+        zork: 'bork', // should be ignored
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateGroup);
+
+      delete updateGroup.zork;
+      const test: object = Object.assign({}, group, updateGroup, {
+        uuid: resource.get('uuid'),
+      });
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.include(test);
+      expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
+      'createdAt');
+      expect(response.body.uuid).to.eq(resource.get('uuid'));
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+  });
 });
