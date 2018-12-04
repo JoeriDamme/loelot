@@ -72,6 +72,41 @@ describe(uri, () => {
         creatorUuid: user.get('uuid'),
       }, groups[1]));
     });
+
+    it('should return all groups with associations', async () => {
+      const groups: Group[] = await Group.findAll();
+      await bluebird.each(groups, async (group: Group) => group.destroy());
+
+      const userNew: User = await User.create({
+        displayName: 'xx yx',
+        email: 'ownrinor@gmail.com',
+        firstName: 'xx',
+        lastName: 'yx',
+      });
+
+      const resourceGroup: Group = await Group.create({
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.imgur.com/test.png',
+        name: 'lol',
+      });
+
+      await resourceGroup.$set('users', userNew);
+
+      const response: any = await request(expressApp)
+        .get(`${uri}?include=admin,creator,users`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.length(1);
+      response.body.forEach((group: any) => {
+        expect(group).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt', 'createdAt', 'users', 'creator', 'admin');
+        expect(moment(group.createdAt).isValid()).to.be.true;
+        expect(moment(group.updatedAt).isValid()).to.be.true;
+        expect(validateUuid(group.uuid, 4)).to.be.true;
+      });
+
+    });
   });
 
   describe('GET /:uuid', () => {
@@ -93,6 +128,32 @@ describe(uri, () => {
       expect(response.body).to.include(group);
       expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
       'createdAt');
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return a resource with associations', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.lol.nl/4.png',
+        name: 'Hey',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      await resource.$set('users', user);
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${resource.get('uuid')}?include=admin,creator,users`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.include(group);
+      expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
+      'createdAt', 'admin', 'creator', 'users');
+      expect(response.body.users).to.have.length(1);
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;

@@ -1,6 +1,7 @@
 import Sequelize from 'sequelize';
-import { AllowNull, Column, DataType, HasMany, IsEmail, Length, Model, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsToMany, Column, DataType, HasMany, IsEmail, Length, Model, Table } from 'sequelize-typescript';
 import Group from './group.model';
+import GroupUser from './groupuser.model';
 
 @Table({
   timestamps: true,
@@ -55,4 +56,7 @@ export default class User extends Model<User> {
     foreignKey: 'creatorUuid',
   })
   public groupCreator: Group[];
+
+  @BelongsToMany(() => Group, () => GroupUser)
+  public groups: Group[];
 }

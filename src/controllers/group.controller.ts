@@ -29,6 +29,9 @@ export default class GroupController {
 
     try {
       const resource: Group = await GroupService.create(data);
+
+      // Add jwt user to group
+      resource.$set('users', request.user);
       return response.status(201).json(resource);
     } catch (error) {
       return next(error);
@@ -43,13 +46,19 @@ export default class GroupController {
    */
   public static async query(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
     try {
-      const resources: Group[] = await GroupService.query();
+      const resources: Group[] = await GroupService.query(request.query);
       return response.json(resources);
     } catch (error) {
       return next(error);
     }
   }
 
+  /**
+   * Get one group.
+   * @param request
+   * @param response
+   * @param next
+   */
   public static read(request: IRequestGroupResource, response: Response, next: NextFunction): Response {
     return response.json(request.resource);
   }
@@ -65,7 +74,8 @@ export default class GroupController {
       if (!validateUuid(request.params.uuid, 4)) {
         return next(new ResourceNotFoundError(`Invalid format UUID: ${request.params.uuid}`));
       }
-      const resource: Group|null = await GroupService.findByPk(request.params.uuid);
+
+      const resource: Group|null = await GroupService.findByPk(request.params.uuid, request.query);
 
       if (!resource) {
         return next(new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`));
@@ -107,6 +117,12 @@ export default class GroupController {
     }
   }
 
+  /**
+   * Delete the requested Group.
+   * @param request
+   * @param response
+   * @param next
+   */
   public static async delete(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       await GroupService.delete(request.resource.get('uuid'));

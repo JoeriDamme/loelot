@@ -10,7 +10,7 @@
     "test:integration": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/integration/**/*.spec.ts'",
     "dev": "nodemon",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
-    "sync": "cross-env NODE_ENV=test ts-node script/sync.ts"
+    "sync": "cross-env NODE_ENV=production ts-node script/sync.ts"
   },
   "pre-commit": [
     "lint",

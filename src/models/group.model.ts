@@ -1,6 +1,7 @@
-import Sequelize, { Models } from 'sequelize';
-import { AllowNull, BeforeBulkUpdate, BelongsTo, Column, DataType, ForeignKey, IsUUID,
+import Sequelize from 'sequelize';
+import { AllowNull, BeforeBulkUpdate, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, IsUUID,
   Length, Model, Table } from 'sequelize-typescript';
+import GroupUser from './groupuser.model';
 import User from './user.model';
 
 @Table({
@@ -58,4 +59,7 @@ export default class Group extends Model<Group> {
   })
   @Column(DataType.STRING(255))
   public icon: string;
+
+  @BelongsToMany(() => User, () => GroupUser)
+  public users: User[];
 }
