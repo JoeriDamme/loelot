@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import validateUuid from 'uuid-validate';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
+import SequelizeUtility from '../lib/sequelize-utility';
 import Group from '../models/group.model';
 import GroupService, { IGroupAttributes } from '../service/group.service';
 
@@ -54,12 +55,11 @@ export default class GroupController {
   }
 
   /**
-   * Find Group by primary key.
+   * Express middleware to find Group by primary key.
    * @param request
    * @param response
    * @param next
    */
-  // tslint:disable-next-line:max-line-length
   public static async findByPK(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       if (!validateUuid(request.params.uuid, 4)) {
@@ -83,11 +83,25 @@ export default class GroupController {
    * @param response
    * @param next
    */
-  // tslint:disable-next-line:max-line-length
   public static async update(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       const resource: Group = await GroupService.update(request.body, request.resource.get('uuid'));
       response.json(resource);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Express middleware to check if all properties for PUT are set.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async checkAllPropertiesAreSet(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      SequelizeUtility.hasMandatoryAttributes(Group, Object.keys(request.body), []);
+      return next();
     } catch (error) {
       return next(error);
     }

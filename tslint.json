@@ -21,7 +21,8 @@
         "member-variable-declaration",
         "object-destructuring",
         "array-destructuring"
-      ]      
+      ],
+      "max-line-length": [true, 160]      
     },
     "rulesDirectory": []
 }
