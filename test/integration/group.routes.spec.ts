@@ -469,7 +469,7 @@ describe(uri, () => {
 
       expect(response.status).to.eq(204);
       expect(response.body).to.deep.equal({});
-      const test: Group|null = await Group.findByPrimary(resource.get('uuid'));
+      const test: Group|null = await Group.findByPk(resource.get('uuid'));
       expect(test).to.be.null;
     });
   });
