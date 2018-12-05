@@ -38,6 +38,7 @@ const options: any = {
 
 export const logger: winston.Logger = winston.createLogger({
   exitOnError: false,
+  silent: process.env.NODE_ENV !== 'test' ? false : true,
   transports: [
     new winston.transports.File(options.file),
     new winston.transports.Console(options.console),
