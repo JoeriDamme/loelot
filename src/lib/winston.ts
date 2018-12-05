@@ -1,27 +1,41 @@
 import appRoot from 'app-root-path';
+import httpContext from 'express-http-context';
+import { Format, TransformableInfo } from 'logform';
 import { Options } from 'morgan';
-import winston from 'winston';
+import winston, { format } from 'winston';
+
+const timestamp: Format = format.timestamp({
+  format: 'YYYY-MM-DD HH:mm:ss.SSS',
+});
+const messageFormat: Format = format.printf((info: TransformableInfo) => `${info.timestamp} ${httpContext.get('uniqid')} [${info.level}]: ${info.message}`);
 
 const options: any = {
   console: {
-    colorize: true,
+    format: format.combine(
+      format.colorize(),
+      timestamp,
+      messageFormat,
+    ),
     handleExceptions: true,
     json: false,
     level: 'debug',
   },
   file: {
-    colorize: false,
     filename: `${appRoot}/logs/app.log`,
+    format: format.combine(
+      timestamp,
+      messageFormat,
+    ),
     handleExceptions: true,
     json: true,
     level: 'info',
     maxFiles: 5,
-    maxsize: 5242880, // 5MB
+    maxsize: 5242880,
   },
 };
 
 export const logger: winston.Logger = winston.createLogger({
-  exitOnError: false, // do not exit on handled exceptions
+  exitOnError: false,
   transports: [
     new winston.transports.File(options.file),
     new winston.transports.Console(options.console),
