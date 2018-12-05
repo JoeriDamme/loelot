@@ -9,7 +9,6 @@ export default class ErrorHandler {
 
   constructor(error: any) {
     this.error = error;
-    // console.error(this.error); // tslint:disable-line
   }
 
   public getClientError(request: Request): ApplicationError {
