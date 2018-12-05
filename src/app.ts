@@ -20,10 +20,6 @@ interface IApplicationRouter {
   path: string;
 }
 
-export interface IRequestId extends Request {
-  id: string;
-}
-
 export default class App {
   private app: express.Application;
 
@@ -79,13 +75,13 @@ export default class App {
 
     routes.forEach((route: IApplicationRouter) => this.app.use(route.path, route.middleware, route.handler));
 
-    this.app.use((request: IRequestId, response: Response, next: NextFunction) => {
+    this.app.use((request: Request, response: Response, next: NextFunction) => {
       const error: EndpointNotFoundError = new EndpointNotFoundError();
       logger.error(`${error.status} - ${error.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
       return response.status(error.status).json(error);
     });
 
-    this.app.use((err: any, request: IRequestId, response: Response, next: NextFunction) => {
+    this.app.use((err: any, request: Request, response: Response, next: NextFunction) => {
       const clientError: ApplicationError = new ErrorHandler(err).getClientError(request);
       return response.status(clientError.status).json(clientError);
     });
