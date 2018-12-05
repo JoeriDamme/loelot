@@ -1,4 +1,6 @@
+import { Request } from 'express';
 import SequelizeValidationError from 'sequelize';
+import { logger } from '../lib/winston';
 import ApplicationError from './errors/application.error';
 import BadRequestError, { IBadRequestErrors } from './errors/bad-request.error';
 
@@ -10,17 +12,22 @@ export default class ErrorHandler {
     // console.error(this.error); // tslint:disable-line
   }
 
-  public getClientError(): ApplicationError {
+  public getClientError(request: Request): ApplicationError {
+    let handledError: ApplicationError;
     if (this.error instanceof SequelizeValidationError.ValidationError) {
-      return new BadRequestError('Validation error', this.getErrorsSequelizeValidationError());
+      handledError =  new BadRequestError('Validation error', this.getErrorsSequelizeValidationError());
     } else if (this.error instanceof SequelizeValidationError.ForeignKeyConstraintError) {
-      return new BadRequestError('Validation error', this.getErrorsSequelizeConstraintError());
+      handledError = new BadRequestError('Validation error', this.getErrorsSequelizeConstraintError());
     } else if (this.error instanceof ApplicationError) {
       // the error has already been handled
-      return this.error;
+      handledError = this.error;
+    } else {
+      handledError = new ApplicationError('Something went wrong. Please try again');
     }
 
-    return new ApplicationError('Something went wrong. Please try again');
+    logger.error(`${handledError.status} - ${this.error.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
+
+    return handledError;
   }
 
   private getErrorsSequelizeValidationError(): IBadRequestErrors[] {

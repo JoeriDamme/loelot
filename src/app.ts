@@ -80,8 +80,7 @@ export default class App {
     });
 
     this.app.use((err: any, request: Request, response: Response, next: NextFunction) => {
-      logger.error(`${err.status || 500} - ${err.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
-      const clientError: ApplicationError = new ErrorHandler(err).getClientError();
+      const clientError: ApplicationError = new ErrorHandler(err).getClientError(request);
       return response.status(clientError.status).json(clientError);
     });
   }
