@@ -47,5 +47,6 @@ export const logger: winston.Logger = winston.createLogger({
 
 export const morganOption: Options = {
   stream: {
-    write: (message: string): any => logger.info(message)},
+    write: (message: string): any => logger.info(message),
+  },
 };
