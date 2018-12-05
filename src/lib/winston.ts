@@ -7,7 +7,9 @@ import winston, { format } from 'winston';
 const timestamp: Format = format.timestamp({
   format: 'YYYY-MM-DD HH:mm:ss.SSS',
 });
-const messageFormat: Format = format.printf((info: TransformableInfo) => `${info.timestamp} ${httpContext.get('uniqid')} [${info.level}]: ${info.message}`);
+const messageFormat: Format = format.printf((info: TransformableInfo) => {
+  return `${info.timestamp} ${httpContext.get('uniqid')} [${info.level}]: ${info.message}`.replace(/(\r\n\t|\n|\r\t)/gm, '');
+});
 
 const options: any = {
   console: {
@@ -44,8 +46,5 @@ export const logger: winston.Logger = winston.createLogger({
 
 export const morganOption: Options = {
   stream: {
-    write: (message: string): any => {
-      logger.info(message.trim());
-    },
-  },
+    write: (message: string): any => logger.info(message)},
 };
