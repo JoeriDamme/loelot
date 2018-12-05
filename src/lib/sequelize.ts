@@ -1,10 +1,12 @@
 import config from 'config';
 import { Sequelize } from 'sequelize-typescript';
+import { logger } from './winston';
 
 export default new Sequelize({
   database: config.get('database.name') as string,
   dialect: process.env.DB_DIALECT as string,
   host: process.env.DB_HOST as string,
+  logging: (message: string): any => logger.info(message),
   modelPaths: [`${__dirname}/../models/*.model.ts`],
   operatorsAliases: Sequelize.Op as any,
   password: process.env.DB_PASS as string,

@@ -1,10 +1,14 @@
 import bodyParser from 'body-parser';
 import express, { NextFunction, Request, Response, Router } from 'express';
+import httpContext from 'express-http-context';
 import http from 'http';
+import morgan from 'morgan';
+import uniqid from 'uniqid';
 import Authentication from './lib/authentication';
 import ErrorHandler from './lib/error-handling';
 import ApplicationError from './lib/errors/application.error';
 import EndpointNotFoundError from './lib/errors/endpoint-not-found.error';
+import { logger, morganOption } from './lib/winston';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
 import { groupRoutes } from './routes/group.routes';
@@ -73,11 +77,12 @@ export default class App {
 
     this.app.use((request: Request, response: Response, next: NextFunction) => {
       const error: EndpointNotFoundError = new EndpointNotFoundError();
+      logger.error(`${error.status} - ${error.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
       return response.status(error.status).json(error);
     });
 
-    this.app.use((err: Error, request: Request, response: Response, next: NextFunction) => {
-      const clientError: ApplicationError = new ErrorHandler(err).getClientError();
+    this.app.use((err: any, request: Request, response: Response, next: NextFunction) => {
+      const clientError: ApplicationError = new ErrorHandler(err).getClientError(request);
       return response.status(clientError.status).json(clientError);
     });
   }
@@ -86,6 +91,13 @@ export default class App {
    *
    */
   private setExpressConfiguration(): void {
+    // Share uniqid through app, usefull for logging.
+    this.app.use(httpContext.middleware);
+    this.app.use((request: Request, response: Response, next: NextFunction) => {
+      httpContext.set('uniqid', uniqid());
+      return next();
+    });
+    this.app.use(morgan('combined', morganOption));
     this.app.use(bodyParser.urlencoded({extended: true}));
     this.app.use(bodyParser.json());
     return;
