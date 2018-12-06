@@ -3,6 +3,10 @@ import Group from './group.model';
 import User from './user.model';
 
 @Table({
+  indexes: [{
+    fields: ['email', 'groupUuid'],
+    unique: true,
+  }],
   timestamps: true,
 })
 export default class Invitation extends Model<Invitation> {
@@ -53,5 +57,5 @@ export default class Invitation extends Model<Invitation> {
 
   @AllowNull(false)
   @Column(DataType.DATE)
-  public sendAt: string;
+  public sentAt: string;
 }

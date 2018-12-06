@@ -12,6 +12,7 @@ import { logger, morganOption } from './lib/winston';
 import { apiRoutes } from './routes/api.routes';
 import { authenticationRoutes } from './routes/authenticate.routes';
 import { groupRoutes } from './routes/group.routes';
+import { invitationRoutes } from './routes/invitation.routes';
 import { userRoutes } from './routes/user.routes';
 
 interface IApplicationRouter {
@@ -70,6 +71,11 @@ export default class App {
         handler: groupRoutes,
         middleware: [Authentication.validateJWT],
         path: '/api/v1/groups',
+      },
+      {
+        handler: invitationRoutes,
+        middleware: [Authentication.validateJWT],
+        path: '/api/v1/invitations',
       },
     ];
 
