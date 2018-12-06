@@ -1,5 +1,6 @@
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, IsEmail, IsInt, IsUUID, Length, Max, Min, Model, Sequelize, Table} from 'sequelize-typescript';
 import Group from './group.model';
+import User from './user.model';
 
 @Table({
   timestamps: true,
@@ -22,6 +23,17 @@ export default class Invitation extends Model<Invitation> {
     constraints: true,
   })
   public group: Group;
+
+  @IsUUID(4)
+  @AllowNull(false)
+  @ForeignKey(() => User)
+  @Column(DataType.UUID)
+  public creatorUuid: string;
+
+  @BelongsTo(() => User, {
+    constraints: true,
+  })
+  public creator: User;
 
   @AllowNull(false)
   @Length({
