@@ -6,6 +6,12 @@ import Invitation from '../models/invitation.model';
 import InvitationService, { IInvitationAttributes } from '../service/invitation.service';
 
 export default class InvitationController {
+  /**
+   * Create an Invitation.
+   * @param request
+   * @param response
+   * @param next
+   */
   public static async post(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       const isAdmin: boolean = await request.user.isAdminGroup(request.body.groupUuid);
@@ -27,6 +33,21 @@ export default class InvitationController {
       const resource: Invitation = await InvitationService.create(data);
 
       return response.status(201).json(resource);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Query all Invitations.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async query(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const resources: Invitation[] = await InvitationService.query(request.query);
+      return response.json(resources);
     } catch (error) {
       return next(error);
     }

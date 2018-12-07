@@ -1,7 +1,13 @@
-import { AllowNull, BelongsTo, Column, DataType, ForeignKey, IsEmail, IsInt, IsUUID, Length, Max, Min, Model, Sequelize, Table} from 'sequelize-typescript';
+import { AllowNull, BelongsTo, Column, DataType, DefaultScope, ForeignKey, IsEmail, IsInt, IsUUID, Length, Max, Min, Model,
+  Sequelize, Table } from 'sequelize-typescript';
 import Group from './group.model';
 import User from './user.model';
 
+@DefaultScope({
+  attributes: {
+    exclude: ['token', 'expiresAt'],
+  },
+})
 @Table({
   indexes: [{
     fields: ['email', 'groupUuid'],

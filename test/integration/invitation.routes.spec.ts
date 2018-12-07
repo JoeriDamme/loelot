@@ -1,4 +1,6 @@
+import bluebird from 'bluebird';
 import { expect } from 'chai';
+import Crypto from 'crypto';
 import moment from 'moment';
 import request from 'supertest';
 import validateUuid from 'uuid-validate';
@@ -39,6 +41,63 @@ describe.only(uri, () => {
     await user.$add('groups', group);
 
     token = Authentication.generateJWT(user);
+  });
+
+  describe('GET /', () => {
+    it('should get all invitations', async () => {
+      const invitations: any = [
+        {
+          creatorUuid: user.get('uuid'),
+          email: 'ewhwehwehweh@mailinator.com',
+          expiresAt: moment(),
+          groupUuid: group.get('uuid'),
+          sentAt: moment(),
+          timesSent: 1,
+          token: Crypto.randomBytes(48).toString('hex'),
+        },
+        {
+          creatorUuid: user.get('uuid'),
+          email: 'powegwehs@mailinator.com',
+          expiresAt: moment(),
+          groupUuid: group.get('uuid'),
+          sentAt: moment(),
+          timesSent: 1,
+          token: Crypto.randomBytes(48).toString('hex'),
+        },
+      ];
+
+      await bluebird.each(invitations, async (invitation: any) => Invitation.create(invitation));
+
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.length(2);
+      response.body.forEach((invitation: any) => {
+        expect(invitation).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'email', 'timesSent', 'sentAt', 'updatedAt', 'createdAt');
+        expect(moment(invitation.createdAt).isValid()).to.be.true;
+        expect(moment(invitation.updatedAt).isValid()).to.be.true;
+        expect(moment(invitation.sentAt).isValid()).to.be.true;
+        expect(validateUuid(invitation.uuid, 4)).to.be.true;
+      });
+      delete invitations[0].expiresAt; // excluded
+      delete invitations[0].token; // excluded
+      delete invitations[0].sentAt; // database will parse it and display is different. CHecked above for valid date/time
+
+      delete invitations[1].expiresAt; // excluded
+      delete invitations[1].token; // excluded
+      delete invitations[1].sentAt; // database will parse it and display is different. CHecked above for valid date/time
+
+      expect(response.body[0]).to.include(Object.assign({
+        creatorUuid: user.get('uuid'),
+        timesSent: 1,
+      }, invitations[0]));
+      expect(response.body[1]).to.include(Object.assign({
+        creatorUuid: user.get('uuid'),
+        timesSent: 1,
+      }, invitations[1]));
+    });
   });
 
   describe('POST /', () => {
