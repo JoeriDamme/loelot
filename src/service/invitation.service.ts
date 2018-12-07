@@ -7,6 +7,8 @@ export interface IInvitationAttributes {
   groupUuid: string;
   timesSent: number;
   sentAt: Moment;
+  token: string;
+  expiresAt: Moment;
 }
 
 export default class InvitationService {

@@ -1,3 +1,4 @@
+import Crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import moment from 'moment';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
@@ -16,9 +17,11 @@ export default class InvitationController {
       const data: IInvitationAttributes = {
         creatorUuid: request.user.get('uuid'),
         email: request.body.email,
+        expiresAt: moment(),
         groupUuid: request.body.groupUuid,
         sentAt: moment(),
         timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
       };
 
       const resource: Invitation = await InvitationService.create(data);

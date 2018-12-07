@@ -58,4 +58,12 @@ export default class Invitation extends Model<Invitation> {
   @AllowNull(false)
   @Column(DataType.DATE)
   public sentAt: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING(96))
+  public token: string;
+
+  @AllowNull(false)
+  @Column(DataType.DATE)
+  public expiresAt: string;
 }
