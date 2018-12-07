@@ -32,7 +32,12 @@ export default class InvitationController {
 
       const resource: Invitation = await InvitationService.create(data);
 
-      return response.status(201).json(resource);
+      // create method in Sequelize ignores excluding attributes
+      const plain: any = resource.toJSON();
+      delete plain.token;
+      delete plain.expiresAt;
+
+      return response.status(201).json(plain);
     } catch (error) {
       return next(error);
     }

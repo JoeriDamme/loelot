@@ -150,13 +150,11 @@ describe.only(uri, () => {
         creatorUuid: user.get('uuid'),
         timesSent: 1,
       }, invitation));
-      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'email', 'expiresAt', 'timesSent', 'token', 'sentAt',
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'email', 'timesSent', 'sentAt',
         'updatedAt', 'createdAt');
-      expect(response.body.token).to.have.length(96);
       expect(moment(response.body.sentAt).isValid()).to.be.true;
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
-      expect(moment(response.body.expiresAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
