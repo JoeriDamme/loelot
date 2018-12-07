@@ -157,5 +157,28 @@ describe.only(uri, () => {
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
+
+    it('should give an error when invitation for same email and group', async () => {
+      const invitation: any = {
+        email: 'loelot@mailinator.com',
+        groupUuid: group.get('uuid'),
+      };
+
+      const response: any = await request(expressApp)
+        .post(`${uri}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(invitation);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'email must be unique', property: 'email' },
+          { message: 'groupUuid must be unique', property: 'groupUuid'},
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
   });
 });
