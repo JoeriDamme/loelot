@@ -41,6 +41,15 @@ export default class InvitationService {
   }
 
   /**
+   * Find Invitation by UUID.
+   * @param uuid
+   */
+  public static async findByPk(uuid: string, options: any): Promise<Invitation|null> {
+    const queryOptions: IInvitationQueryOptions = InvitationService.getQueryOptions(options);
+    return Invitation.findByPk(uuid, queryOptions);
+  }
+
+  /**
    * Get query options.
    * @param options
    */

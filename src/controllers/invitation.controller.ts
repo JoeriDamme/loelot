@@ -1,9 +1,15 @@
 import Crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import moment from 'moment';
+import validateUuid from 'uuid-validate';
+import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
 import Invitation from '../models/invitation.model';
 import InvitationService, { IInvitationAttributes } from '../service/invitation.service';
+
+interface IRequestInvitationResource extends Request {
+  resource: Invitation;
+}
 
 export default class InvitationController {
   /**
@@ -53,6 +59,34 @@ export default class InvitationController {
     try {
       const resources: Invitation[] = await InvitationService.query(request.query);
       return response.json(resources);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  public static read(request: IRequestInvitationResource, response: Response, next: NextFunction): Response {
+    return response.json(request.resource);
+  }
+
+  /**
+   * Express middleware to find Group by primary key.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async findByPK(request: IRequestInvitationResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      if (!validateUuid(request.params.uuid, 4)) {
+        return next(new ResourceNotFoundError(`Invalid format UUID: ${request.params.uuid}`));
+      }
+
+      const resource: Invitation|null = await InvitationService.findByPk(request.params.uuid, request.query);
+
+      if (!resource) {
+        return next(new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`));
+      }
+      request.resource = resource;
+      return next();
     } catch (error) {
       return next(error);
     }

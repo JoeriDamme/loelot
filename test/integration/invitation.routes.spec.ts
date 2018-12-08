@@ -12,7 +12,7 @@ import User from '../../src/models/user.model';
 
 const uri: string = '/api/v1/invitations';
 
-describe.only(uri, () => {
+describe(uri, () => {
   let expressApp: Express.Application;
   let token: string;
   let user: User;
@@ -178,6 +178,106 @@ describe.only(uri, () => {
         message: 'Validation error',
         name: 'BadRequestError',
         status: 400,
+      });
+    });
+  });
+
+  describe('GET /:uuid', () => {
+    it('should return a resource', async () => {
+      const invite: Invitation = await Invitation.create({
+        creatorUuid: user.get('uuid'),
+        email: 'kekeke123@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${invite.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'email', 'timesSent', 'sentAt',
+      'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        email: 'kekeke123@mailinator.com',
+        groupUuid: group.get('uuid'),
+        timesSent: 1,
+      });
+      expect(moment(response.body.sentAt).isValid()).to.be.true;
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return a invitation with associations', async () => {
+      const invite: Invitation = await Invitation.create({
+        creatorUuid: user.get('uuid'),
+        email: 'lololol@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${invite.get('uuid')}?include=creator,group`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'creator', 'groupUuid', 'group', 'email', 'timesSent', 'sentAt',
+      'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        email: 'lololol@mailinator.com',
+        groupUuid: group.get('uuid'),
+        timesSent: 1,
+      });
+      expect(response.body.group).to.include({
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.mooi.nl/kekeke.png',
+        name: 'Groep met vrienden',
+      });
+      expect(response.body.creator).to.include({
+        displayName: 'Henkie Tankie',
+        email: 'hankietankie@gmail.com',
+        firstName: 'Henkie',
+        lastName: 'Tankie',
+      });
+      expect(moment(response.body.sentAt).isValid()).to.be.true;
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return an error if resource not found', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/43bbb558-8fce-43d7-9e88-faa1581fd3ee`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Resource not found with UUID: 43bbb558-8fce-43d7-9e88-faa1581fd3ee',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
+    });
+
+    it('should return an error if uuid is invalid', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/aabbcc`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Invalid format UUID: aabbcc',
+        name: 'ResourceNotFoundError',
+        status: 404,
       });
     });
   });
