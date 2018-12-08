@@ -1,4 +1,4 @@
-import { AllowNull, BelongsTo, Column, DataType, DefaultScope, ForeignKey, IsEmail, IsInt, IsUUID, Length, Max, Min, Model,
+import { AllowNull, BeforeBulkUpdate, BelongsTo, Column, DataType, DefaultScope, ForeignKey, IsEmail, IsInt, IsUUID, Length, Max, Min, Model,
   Sequelize, Table } from 'sequelize-typescript';
 import Group from './group.model';
 import User from './user.model';
@@ -16,6 +16,19 @@ import User from './user.model';
   timestamps: true,
 })
 export default class Invitation extends Model<Invitation> {
+    // Delete the UUID property when updating via model, not instance.
+  // See https://github.com/sequelize/sequelize/issues/6253#issuecomment-233829414
+  @BeforeBulkUpdate
+  public static removeReadOnly(instance: any): void {
+    delete instance.attributes.uuid;
+    delete instance.attributes.groupUuid;
+    delete instance.attributes.sentAt;
+    delete instance.attributes.timesSent;
+    delete instance.attributes.creatorUuid;
+    delete instance.attributes.token;
+    delete instance.attributes.expiresAt;
+  }
+
   @Column({
     defaultValue: Sequelize.fn('uuid_generate_v4'),
     primaryKey: true,

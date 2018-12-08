@@ -4,6 +4,7 @@ import moment from 'moment';
 import validateUuid from 'uuid-validate';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
+import SequelizeUtility from '../lib/sequelize-utility';
 import Invitation from '../models/invitation.model';
 import InvitationService, { IInvitationAttributes } from '../service/invitation.service';
 
@@ -69,6 +70,21 @@ export default class InvitationController {
   }
 
   /**
+   * Update Invitation.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async update(request: IRequestInvitationResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const resource: Invitation = await InvitationService.update(request.body, request.resource.get('uuid'));
+      response.json(resource);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
    * Express middleware to find Group by primary key.
    * @param request
    * @param response
@@ -86,6 +102,29 @@ export default class InvitationController {
         return next(new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`));
       }
       request.resource = resource;
+      return next();
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Express middleware to check if all properties for PUT are set.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async checkAllPropertiesAreSet(request: Request, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      // Read-only fields excluded.
+      SequelizeUtility.hasMandatoryAttributes(Invitation, Object.keys(request.body), [
+        'groupUuid',
+        'sentAt',
+        'timesSent',
+        'creatorUuid',
+        'token',
+        'expiresAt',
+      ]);
       return next();
     } catch (error) {
       return next(error);

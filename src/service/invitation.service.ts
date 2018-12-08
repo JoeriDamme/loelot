@@ -1,4 +1,5 @@
 import { Moment } from 'moment';
+import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 import Invitation from '../models/invitation.model';
 import User from '../models/user.model';
@@ -47,6 +48,26 @@ export default class InvitationService {
   public static async findByPk(uuid: string, options: any): Promise<Invitation|null> {
     const queryOptions: IInvitationQueryOptions = InvitationService.getQueryOptions(options);
     return Invitation.findByPk(uuid, queryOptions);
+  }
+
+  /**
+   * Update an Invitation.
+   * @param data
+   * @param uuid
+   */
+  public static async update(data: IInvitationAttributes, uuid: string): Promise<Invitation> {
+    await Invitation.update(data, {
+      where: {
+        uuid,
+      },
+    });
+    const invitation: Invitation|null = await Invitation.findByPk(uuid);
+
+    if (!invitation) {
+      throw new ApplicationError('Error fetching resource after update');
+    }
+
+    return invitation;
   }
 
   /**
