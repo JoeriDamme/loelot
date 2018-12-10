@@ -330,7 +330,7 @@ describe(uri, () => {
       const resource: Invitation = await Invitation.create(invite);
 
       const updateInv: any = {
-        email: 'kkk', // invalid email address
+        email: 'fnd', // invalid email address
       };
 
       const response: any = await request(expressApp)
@@ -368,7 +368,7 @@ describe(uri, () => {
         expiresAt: moment.now(), // must be ignored
         groupUuid: '33850f7f-0eb4-4166-a6db-46b0ea4d1a7d', // must be ignored
         sentAt: moment.now(), // must be ignored
-        timesSent: 123, // must be ignored
+        timesSent: 1, // must be ignored
         token: 'lolol', // must be ignored
         uuid: 'c284a84b-8f8f-4ef3-8c5b-a8264346b29a', // must be ignored
       };
@@ -384,6 +384,87 @@ describe(uri, () => {
       expect(response.body).to.include({
         creatorUuid: user.get('uuid'),
         email: 'updatemewehj@mailinator.com',
+        groupUuid: group.get('uuid'),
+        timesSent: 1,
+      });
+      expect(response.body.uuid).to.eq(resource.get('uuid'));
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(moment(response.body.sentAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+  });
+
+  describe('PATCH /:uuid', () => {
+
+    it('should give error on invalid data', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'patchinvaliddata@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const patchInv: any = {
+        email: 'qwer', // invalid email address
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(patchInv);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'Validation isEmail on email failed', property: 'email' },
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should patch resource', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'patchsuccess@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const patchInv: any = {
+        creatorUuid: '692f5e8a-accd-4969-b6f1-bcb00ae7ee6d', // must be ignored
+        email: 'patchmewehj@mailinator.com',
+        expiresAt: moment.now(), // must be ignored
+        groupUuid: '33850f7f-0eb4-4166-a6db-46b0ea4d1a7d', // must be ignored
+        sentAt: moment.now(), // must be ignored
+        timesSent: 1, // must be ignored
+        token: 'lololx', // must be ignored
+        uuid: 'c284a84b-8f8f-4ef3-8c5b-a8264346b29a', // must be ignored
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(patchInv);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'email', 'timesSent', 'sentAt',
+      'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        email: 'patchmewehj@mailinator.com',
         groupUuid: group.get('uuid'),
         timesSent: 1,
       });
