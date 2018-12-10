@@ -7,4 +7,5 @@ export const invitationRoutes: Router = Router()
   .get('/:uuid', InvitationController.read)
   .put('/:uuid', InvitationController.checkAllPropertiesAreSet, InvitationController.update)
   .patch('/:uuid', InvitationController.update)
+  .delete('/:uuid', InvitationController.delete)
   .param('uuid', InvitationController.findByPK);

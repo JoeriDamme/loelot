@@ -130,4 +130,19 @@ export default class InvitationController {
       return next(error);
     }
   }
+
+  /**
+   * Delete the requested Group.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async delete(request: IRequestInvitationResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      await InvitationService.delete(request.resource.get('uuid'));
+      return response.status(204).json();
+    } catch (error) {
+      return next(error);
+    }
+  }
 }

@@ -475,4 +475,29 @@ describe(uri, () => {
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
+
+  describe('DELETE /:uuid', () => {
+    it('should delete group', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'deleteme@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(204);
+      expect(response.body).to.deep.equal({});
+      const test: Invitation|null = await Invitation.findByPk(resource.get('uuid'));
+      expect(test).to.be.null;
+    });
+  });
 });

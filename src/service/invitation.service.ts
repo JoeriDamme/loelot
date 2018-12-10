@@ -71,6 +71,20 @@ export default class InvitationService {
   }
 
   /**
+   * Delete Invitation with UUID.
+   * @param uuid
+   */
+  public static async delete(uuid: string): Promise<void> {
+    await Invitation.destroy({
+      where: {
+        uuid,
+      },
+    });
+
+    return;
+  }
+
+  /**
    * Get query options.
    * @param options
    */
