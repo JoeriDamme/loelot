@@ -59,4 +59,22 @@ export default class User extends Model<User> {
 
   @BelongsToMany(() => Group, () => GroupUser)
   public groups: Group[];
+
+  /**
+   * Check if a User is admin of a Group.
+   * @param uuid UUID of the Group
+   */
+  public async isAdminGroup(uuid: string): Promise<boolean> {
+    const result: any = await this.$has('groupAdmin', uuid); // think a bug in sequelize? return type should be boolean.
+    return !!result;
+  }
+
+  /**
+   * Check if a User is member of a Group.
+   * @param uuid UUID of the Group
+   */
+  public async isMemberGroup(uuid: string): Promise<boolean> {
+    const result: any = await this.$has('groups', uuid);
+    return !!result;
+  }
 }

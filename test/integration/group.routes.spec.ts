@@ -6,6 +6,7 @@ import validateUuid from 'uuid-validate';
 import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
+import GroupUser from '../../src/models/groupuser.model';
 import User from '../../src/models/user.model';
 
 const uri: string = '/api/v1/groups';
@@ -150,10 +151,28 @@ describe(uri, () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.status).to.eq(200);
-      expect(response.body).to.include(group);
       expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
       'createdAt', 'admin', 'creator', 'users');
+      expect(response.body).to.include(group);
       expect(response.body.users).to.have.length(1);
+      expect(response.body.users[0]).to.include({
+        displayName: 'John Doe',
+        email: 'johndoe@gmail.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+      expect(response.body.admin).to.include({
+        displayName: 'John Doe',
+        email: 'johndoe@gmail.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      });
+      expect(response.body.creator).to.include({
+        displayName: 'John Doe',
+        email: 'johndoe@gmail.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      });
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
@@ -213,6 +232,15 @@ describe(uri, () => {
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
+
+      // check if relationship is set in database between users and group
+      const check: GroupUser[] = await GroupUser.findAll({
+        where: {
+          groupUuid: response.body.uuid,
+          userUuid: user.get('uuid'),
+        },
+      });
+      expect(check).to.have.length(1);
     });
 
     it('should reply with error if data is invalid', async () => {
@@ -259,6 +287,15 @@ describe(uri, () => {
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
+
+      // check if relationship is set in database between users and group
+      const check: GroupUser[] = await GroupUser.findAll({
+        where: {
+          groupUuid: response.body.uuid,
+          userUuid: user.get('uuid'),
+        },
+      });
+      expect(check).to.have.length(1);
     });
   });
 

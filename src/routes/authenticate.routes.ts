@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response, Router } from 'express';
-import nock from 'nock';
 import passport from 'passport';
 import Authentication from '../lib/authentication';
-import BadRequestError from '../lib/errors/bad-request.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
-// nock.recorder.rec();
+
 export const authenticationRoutes: Router = Router()
   .get('/facebook', (request: Request, response: Response, next: NextFunction) => {
     passport.authenticate('facebook-token', {
