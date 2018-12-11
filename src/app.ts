@@ -14,6 +14,7 @@ import { authenticationRoutes } from './routes/authenticate.routes';
 import { groupRoutes } from './routes/group.routes';
 import { invitationRoutes } from './routes/invitation.routes';
 import { userRoutes } from './routes/user.routes';
+import { wishListRoutes } from './routes/wishlist.routes';
 
 interface IApplicationRouter {
   handler: Router;
@@ -76,6 +77,11 @@ export default class App {
         handler: invitationRoutes,
         middleware: [Authentication.validateJWT],
         path: '/api/v1/invitations',
+      },
+      {
+        handler: wishListRoutes,
+        middleware: [Authentication.validateJWT],
+        path: '/api/v1/wishlists',
       },
     ];
 
