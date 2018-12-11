@@ -17,6 +17,8 @@ describe(uri, () => {
   let token: string;
   let user: User;
   let group: Group;
+  let differentUser: User;
+  let differentToken: string;
 
   before(async () => {
     const app: App = new App();
@@ -41,6 +43,15 @@ describe(uri, () => {
     await user.$add('groups', group);
 
     token = Authentication.generateJWT(user);
+
+    differentUser = await User.create({
+      displayName: 'Henkie Tankie',
+      email: 'hankietankie@gmail.com',
+      firstName: 'Henkie',
+      lastName: 'Tankie',
+    });
+
+    differentToken = Authentication.generateJWT(differentUser);
   });
 
   describe('GET /', () => {
@@ -69,7 +80,7 @@ describe(uri, () => {
       await bluebird.each(invitations, async (invitation: any) => Invitation.create(invitation));
 
       const response: any = await request(expressApp)
-        .get(`${uri}`)
+        .get(`${uri}?groupUuid=${group.get('uuid')}`)
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.status).to.eq(200);
@@ -97,6 +108,19 @@ describe(uri, () => {
         creatorUuid: user.get('uuid'),
         timesSent: 1,
       }, invitations[1]));
+
+      // should not possible to query the invitations as other user:
+      const response2: any = await request(expressApp)
+        .get(`${uri}?groupUuid=${group.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`);
+
+      expect(response2.status).to.eq(401);
+      expect(response2.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+
     });
   });
 
@@ -183,6 +207,29 @@ describe(uri, () => {
   });
 
   describe('GET /:uuid', () => {
+    it('should show error if jwt user is not a member of the group', async () => {
+      const invite: Invitation = await Invitation.create({
+        creatorUuid: user.get('uuid'),
+        email: 'qghqigwh@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${invite.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
     it('should return a resource', async () => {
       const invite: Invitation = await Invitation.create({
         creatorUuid: user.get('uuid'),
@@ -283,6 +330,36 @@ describe(uri, () => {
   });
 
   describe('PUT /:uuid', () => {
+    it('should show error if jwt user is not admin of the group', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'owpewkmoebrw@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const updateInv: any = {
+        email: 'oerhjerh@mailinator.com',
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`)
+        .send(updateInv);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
     it('should give error on missing data', async () => {
       const invite: any = {
         creatorUuid: user.get('uuid'),
@@ -396,6 +473,35 @@ describe(uri, () => {
   });
 
   describe('PATCH /:uuid', () => {
+    it('should show error if jwt user is not admin of the group', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'patewgewgess@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const patchInv: any = {
+        email: 'mcewgbewwebwek@mailinator.com',
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`)
+        .send(patchInv);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
 
     it('should give error on invalid data', async () => {
       const invite: any = {
@@ -477,6 +583,31 @@ describe(uri, () => {
   });
 
   describe('DELETE /:uuid', () => {
+    it('should show error if jwt user is not admin of the group', async () => {
+      const invite: any = {
+        creatorUuid: user.get('uuid'),
+        email: 'deletgewgewgeme@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: group.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      };
+
+      const resource: Invitation = await Invitation.create(invite);
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
     it('should delete group', async () => {
       const invite: any = {
         creatorUuid: user.get('uuid'),
