@@ -2,6 +2,13 @@ import Group from '../models/group.model';
 import User from '../models/user.model';
 import WishList from '../models/wishlist.model';
 
+interface IWishListAttributes {
+  creatorUuid: string;
+  description: string;
+  groupUuid: string;
+  rank: number;
+}
+
 interface IWishlistAssociation {
   as: string;
   model: any;
@@ -12,6 +19,14 @@ interface IWishListQueryOptions {
 }
 
 export default class WishListService {
+  /**
+   * Create a Wish List.
+   * @param data
+   */
+  public static async create(data: IWishListAttributes): Promise<WishList> {
+    return WishList.create(data);
+  }
+
   /**
    * Query all Wish Lists.
    * @param options

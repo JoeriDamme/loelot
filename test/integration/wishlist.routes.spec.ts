@@ -87,4 +87,29 @@ describe(uri, () => {
     });
 
   });
+
+  describe('POST', () => {
+    it('should create a new wist list item', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'papieren vliegtuig',
+        groupUuid: group.get('uuid'),
+        rank: 3,
+      };
+
+      const response: any = await request(expressApp)
+        .post(`${uri}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(wishlist);
+
+      expect(response.status).to.eq(201);
+      expect(response.body).to.include(Object.assign({
+        creatorUuid: user.get('uuid'),
+      }, wishlist));
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'description', 'rank', 'updatedAt', 'createdAt');
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+  });
 });
