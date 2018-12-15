@@ -1,3 +1,4 @@
+import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 import User from '../models/user.model';
 import WishList from '../models/wishlist.model';
@@ -43,6 +44,26 @@ export default class WishListService {
   public static async findByPk(uuid: string, options: any): Promise<WishList|null> {
     const queryOptions: IWishListQueryOptions = WishListService.getQueryOptions(options);
     return WishList.findByPk(uuid, queryOptions);
+  }
+
+  /**
+   * Update a WishList.
+   * @param data
+   * @param uuid
+   */
+  public static async update(data: IWishListAttributes, uuid: string): Promise<WishList> {
+    await WishList.update(data, {
+      where: {
+        uuid,
+      },
+    });
+    const wishlist: WishList|null = await WishList.findByPk(uuid);
+
+    if (!wishlist) {
+      throw new ApplicationError('Error fetching resource after update');
+    }
+
+    return wishlist;
   }
 
   /**

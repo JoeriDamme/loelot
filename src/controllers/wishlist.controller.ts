@@ -3,6 +3,7 @@ import validateUuid from 'uuid-validate';
 import BadRequestError from '../lib/errors/bad-request.error';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
+import SequelizeUtility from '../lib/sequelize-utility';
 import WishList from '../models/wishlist.model';
 import WishListService from '../service/wishlist.service';
 
@@ -83,6 +84,21 @@ export default class WishListController {
   }
 
   /**
+   * Update WishList.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async update(request: IRequestWishListResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const resource: WishList = await WishListService.update(request.body, request.resource.get('uuid'));
+      response.json(resource);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
    * Middleware to check if a user is a member of the group.
    * Query string 'groupUuid' must be set.
    * @param request
@@ -92,8 +108,6 @@ export default class WishListController {
   public static async isMemberGroup(request: IRequestWishListResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       // can not check if no groupUuid is set in query string or as parameter of URL.
-      // console.log(request.query.groupUuid);
-      // console.log(request.resource.get('groupUuid'));
       const groupUuid: string = request.query.groupUuid || request.resource.get('groupUuid');
       if (!groupUuid) {
         throw new BadRequestError();
@@ -110,5 +124,28 @@ export default class WishListController {
     } catch (error) {
       return next(error);
     }
+  }
+
+  /**
+   * Express middleware to check if all properties for PUT are set.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async checkAllPropertiesAreSet(request: Request, response: Response, next: NextFunction): Promise<void> {
+    try {
+      SequelizeUtility.hasMandatoryAttributes(WishList, Object.keys(request.body), ['creatorUuid', 'groupUuid']);
+      return next();
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  public static isCreator(request: IRequestWishListResource, response: Response, next: NextFunction): void {
+    if (request.resource.get('creatorUuid') !== request.user.get('uuid')) {
+      return next(new UnauthorizedError());
+    }
+
+    return next();
   }
 }

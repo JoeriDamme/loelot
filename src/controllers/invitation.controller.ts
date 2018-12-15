@@ -143,8 +143,6 @@ export default class InvitationController {
   public static async isMemberGroup(request: IRequestInvitationResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       // can not check if no groupUuid is set in query string or as parameter of URL.
-      // console.log(request.query.groupUuid);
-      // console.log(request.resource.get('groupUuid'));
       const groupUuid: string = request.query.groupUuid || request.resource.get('groupUuid');
       if (!groupUuid) {
         throw new BadRequestError();

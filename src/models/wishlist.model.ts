@@ -7,6 +7,13 @@ import User from './user.model';
   timestamps: true,
 })
 export default class WishList extends Model<WishList> {
+  @BeforeBulkUpdate
+  public static removeReadOnly(instance: any): void {
+    delete instance.attributes.uuid;
+    delete instance.attributes.groupUuid;
+    delete instance.attributes.creatorUuid;
+  }
+
   @Column({
     defaultValue: Sequelize.fn('uuid_generate_v4'),
     primaryKey: true,
@@ -36,10 +43,17 @@ export default class WishList extends Model<WishList> {
   })
   public creator: User;
 
+  @Length({
+    max: 512,
+    min: 1,
+  })
   @AllowNull(false)
   @Column(DataType.TEXT)
   public description: string;
 
+  @Min(0)
+  @Max(255)
+  @IsInt
   @AllowNull(false)
   @Column(DataType.INTEGER)
   public rank: number;

@@ -11,7 +11,7 @@ import WishList from '../../src/models/wishlist.model';
 
 const uri: string = '/api/v1/wishlists';
 
-describe(uri, () => {
+describe.only(uri, () => {
   let expressApp: Express.Application;
   let token: string;
   let user: User;
@@ -160,7 +160,7 @@ describe(uri, () => {
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
 
-    it('should return a invitation with associations', async () => {
+    it('should return a wishlist with associations', async () => {
       const wishlist: WishList = await WishList.create({
         creatorUuid: user.get('uuid'),
         description: 'tol',
@@ -224,6 +224,136 @@ describe(uri, () => {
         name: 'ResourceNotFoundError',
         status: 404,
       });
+    });
+  });
+
+  describe('PUT /:uuid', () => {
+    it('should show error if jwt user is not owner of the wishlist', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'step',
+        groupUuid: group.get('uuid'),
+        rank: 7,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        description: 'tesla',
+        rank: 7,
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
+    it('should give error on missing data', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'auto',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        description: 'bmw',
+        // missing rank
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'WishList.rank cannot be null', property: 'rank' },
+        ],
+        message: 'Missing properties in request',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should give error on invalid data', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'auto',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        description: 'x'.repeat(600), // too long
+        rank: 'ehejwj', // not an integer
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'Validation len on description failed', property: 'description' },
+          { message: 'Validation isInt on rank failed', property: 'rank' },
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should update resource', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'pasta',
+        groupUuid: group.get('uuid'),
+        rank: 1,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        creatorUuid: 'c0f05185-91d2-4ef1-bb0a-5a65fffea431', // ignore
+        description: 'copy',
+        groupUuid: 'd141e1f4-4f6a-436a-b214-63a909622644', // ignore
+        rank: 3,
+        uuid: '1f37472c-047f-4b9e-9f1f-cbdba2f87e30', // ignore
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'description', 'rank', 'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        description: 'copy',
+        groupUuid: group.get('uuid'),
+        rank: 3,
+        uuid: resource.get('uuid'),
+      });
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
 });
