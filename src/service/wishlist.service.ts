@@ -67,6 +67,20 @@ export default class WishListService {
   }
 
   /**
+   * Delete WishList with UUID.
+   * @param uuid
+   */
+  public static async delete(uuid: string): Promise<void> {
+    await WishList.destroy({
+      where: {
+        uuid,
+      },
+    });
+
+    return;
+  }
+
+  /**
    * Get query options.
    * @param options
    */

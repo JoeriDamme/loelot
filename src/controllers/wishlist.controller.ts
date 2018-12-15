@@ -141,11 +141,32 @@ export default class WishListController {
     }
   }
 
+  /**
+   * Express middleware to check if JWT user is creator of resource.
+   * @param request
+   * @param response
+   * @param next
+   */
   public static isCreator(request: IRequestWishListResource, response: Response, next: NextFunction): void {
     if (request.resource.get('creatorUuid') !== request.user.get('uuid')) {
       return next(new UnauthorizedError());
     }
 
     return next();
+  }
+
+  /**
+   * Delete the requested Group.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async delete(request: IRequestWishListResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      await WishListService.delete(request.resource.get('uuid'));
+      return response.status(204).json();
+    } catch (error) {
+      return next(error);
+    }
   }
 }

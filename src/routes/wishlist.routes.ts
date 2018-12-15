@@ -7,4 +7,5 @@ export const wishListRoutes: Router = Router()
   .get('/:uuid', WishListController.isMemberGroup, WishListController.read)
   .put('/:uuid', WishListController.isCreator, WishListController.checkAllPropertiesAreSet, WishListController.update)
   .patch('/:uuid', WishListController.isCreator, WishListController.update)
+  .delete('/:uuid', WishListController.isCreator, WishListController.delete)
   .param('uuid', WishListController.findByPK);

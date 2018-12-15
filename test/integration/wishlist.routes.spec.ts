@@ -448,4 +448,48 @@ describe(uri, () => {
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
     });
   });
+
+  describe('DELETE /:uuid', () => {
+    it('should show error if jwt user is not creator of the wishlist', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'kekeke',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
+    it('should delete group', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'blup',
+        groupUuid: group.get('uuid'),
+        rank: 4,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(204);
+      expect(response.body).to.deep.equal({});
+      const test: WishList|null = await WishList.findByPk(resource.get('uuid'));
+      expect(test).to.be.null;
+    });
+  });
 });
