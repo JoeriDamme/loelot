@@ -11,7 +11,7 @@ import WishList from '../../src/models/wishlist.model';
 
 const uri: string = '/api/v1/wishlists';
 
-describe.only(uri, () => {
+describe(uri, () => {
   let expressApp: Express.Application;
   let token: string;
   let user: User;
@@ -349,6 +349,98 @@ describe.only(uri, () => {
         description: 'copy',
         groupUuid: group.get('uuid'),
         rank: 3,
+        uuid: resource.get('uuid'),
+      });
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+  });
+
+  describe('PATCH /:uuid', () => {
+    it('should show error if jwt user is not owner of the wishlist', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'train',
+        groupUuid: group.get('uuid'),
+        rank: 12,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        description: 'tgv',
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
+    it('should give error on invalid data', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'locomotive',
+        groupUuid: group.get('uuid'),
+        rank: 1,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        description: 'p'.repeat(600), // too long
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(400);
+      expect(response.body).to.deep.equal({
+        errors: [
+          { message: 'Validation len on description failed', property: 'description' },
+        ],
+        message: 'Validation error',
+        name: 'BadRequestError',
+        status: 400,
+      });
+    });
+
+    it('should patch resource', async () => {
+      const wishlist: any = {
+        creatorUuid: user.get('uuid'),
+        description: 'police',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+      };
+
+      const resource: WishList = await WishList.create(wishlist);
+
+      const updateWishList: any = {
+        rank: 1,
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updateWishList);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'description', 'rank', 'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        description: 'police',
+        groupUuid: group.get('uuid'),
+        rank: 1,
         uuid: resource.get('uuid'),
       });
       expect(moment(response.body.createdAt).isValid()).to.be.true;
