@@ -37,6 +37,15 @@ export default class WishListService {
   }
 
   /**
+   * Find WishList by UUID.
+   * @param uuid
+   */
+  public static async findByPk(uuid: string, options: any): Promise<WishList|null> {
+    const queryOptions: IWishListQueryOptions = WishListService.getQueryOptions(options);
+    return WishList.findByPk(uuid, queryOptions);
+  }
+
+  /**
    * Get query options.
    * @param options
    */

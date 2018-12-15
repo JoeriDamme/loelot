@@ -70,7 +70,7 @@ describe(uri, () => {
         },
       ];
 
-      await bluebird.each(wishlists, async (wishlist: any) => WishList.create(wishlist));
+      await bluebird.each(wishlists, async (wishlistItem: any) => WishList.create(wishlistItem));
 
       const response: any = await request(expressApp)
         .get(`${uri}?groupUuid=${group.get('uuid')}`)
@@ -78,19 +78,19 @@ describe(uri, () => {
 
       expect(response.status).to.eq(200);
       expect(response.body).to.have.length(2);
-      response.body.forEach((wishlist: any) => {
-        expect(wishlist).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'rank', 'description', 'updatedAt', 'createdAt');
-        expect(moment(wishlist.createdAt).isValid()).to.be.true;
-        expect(moment(wishlist.updatedAt).isValid()).to.be.true;
-        expect(validateUuid(wishlist.uuid, 4)).to.be.true;
+      response.body.forEach((wishlistItem: any) => {
+        expect(wishlistItem).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'rank', 'description', 'updatedAt', 'createdAt');
+        expect(moment(wishlistItem.createdAt).isValid()).to.be.true;
+        expect(moment(wishlistItem.updatedAt).isValid()).to.be.true;
+        expect(validateUuid(wishlistItem.uuid, 4)).to.be.true;
       });
     });
 
   });
 
-  describe('POST', () => {
+  describe('POST /', () => {
     it('should create a new wist list item', async () => {
-      const wishlist: any = {
+      const wishlistPost: any = {
         creatorUuid: user.get('uuid'),
         description: 'papieren vliegtuig',
         groupUuid: group.get('uuid'),
@@ -100,16 +100,130 @@ describe(uri, () => {
       const response: any = await request(expressApp)
         .post(`${uri}`)
         .set('Authorization', `Bearer ${token}`)
-        .send(wishlist);
+        .send(wishlistPost);
 
       expect(response.status).to.eq(201);
       expect(response.body).to.include(Object.assign({
         creatorUuid: user.get('uuid'),
-      }, wishlist));
+      }, wishlistPost));
       expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'description', 'rank', 'updatedAt', 'createdAt');
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+  });
+
+  describe('GET /:uuid', () => {
+    it('should show error if jwt user is not a member of the group', async () => {
+      const wishlist: WishList = await WishList.create({
+        creatorUuid: user.get('uuid'),
+        description: 'hoedje',
+        groupUuid: group.get('uuid'),
+        rank: 1,
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${wishlist.get('uuid')}`)
+        .set('Authorization', `Bearer ${differentToken}`);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
+    it('should return a resource', async () => {
+      const wishlist: WishList = await WishList.create({
+        creatorUuid: user.get('uuid'),
+        description: 'bal',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${wishlist.get('uuid')}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creatorUuid', 'groupUuid', 'description', 'rank', 'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        description: 'bal',
+        groupUuid: group.get('uuid'),
+        rank: 2,
+        uuid: wishlist.get('uuid'),
+      });
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return a invitation with associations', async () => {
+      const wishlist: WishList = await WishList.create({
+        creatorUuid: user.get('uuid'),
+        description: 'tol',
+        groupUuid: group.get('uuid'),
+        rank: 10,
+      });
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${wishlist.get('uuid')}?include=creator,group`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(200);
+      expect(response.body).to.have.all.keys('uuid', 'creator', 'creatorUuid', 'groupUuid', 'group', 'description', 'rank', 'updatedAt', 'createdAt');
+      expect(response.body).to.include({
+        creatorUuid: user.get('uuid'),
+        description: 'tol',
+        groupUuid: group.get('uuid'),
+        rank: 10,
+        uuid: wishlist.get('uuid'),
+      });
+      expect(response.body.group).to.include({
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: 'http://www.fyguhj.nl/lol.png',
+        name: 'Groep met Jan en zijn vrienden',
+        uuid: group.get('uuid'),
+      });
+      expect(response.body.creator).to.include({
+        displayName: 'Jantje Beton',
+        email: 'jantjebeton@gmail.com',
+        firstName: 'Jantje',
+        lastName: 'Beton',
+        uuid: user.get('uuid'),
+      });
+      expect(moment(response.body.createdAt).isValid()).to.be.true;
+      expect(moment(response.body.updatedAt).isValid()).to.be.true;
+      expect(validateUuid(response.body.uuid, 4)).to.be.true;
+    });
+
+    it('should return an error if resource not found', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/43bbb558-8fce-43d7-9e88-faa1581fd3ee`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Resource not found with UUID: 43bbb558-8fce-43d7-9e88-faa1581fd3ee',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
+    });
+
+    it('should return an error if uuid is invalid', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}/aabbcc`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: 'Invalid format UUID: aabbcc',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
     });
   });
 });
