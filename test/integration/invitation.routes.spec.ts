@@ -8,6 +8,7 @@ import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
 import Invitation from '../../src/models/invitation.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 
 const uri: string = '/api/v1/invitations';
@@ -19,6 +20,7 @@ describe(uri, () => {
   let group: Group;
   let differentUser: User;
   let differentToken: string;
+  let userRole: Role;
 
   before(async () => {
     const app: App = new App();
@@ -31,12 +33,25 @@ describe(uri, () => {
       where: {},
     });
 
+    const role: Role|null = await Role.findOne({
+      where: {
+        name: 'user',
+      },
+    });
+
+    if (!role) {
+      throw new Error('Can not find Role');
+    }
+
+    userRole = role;
+
     // create user for JWT token
     user = await User.create({
       displayName: 'Henkie Tankie',
       email: 'hankietankie@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
+      roleUuid: role.get('uuid'),
     });
 
     group = await Group.create({
@@ -48,16 +63,17 @@ describe(uri, () => {
 
     await user.$add('groups', group);
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
 
     differentUser = await User.create({
       displayName: 'Henkie Tankie',
       email: 'hankietankie@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
+      roleUuid: role.get('uuid'),
     });
 
-    differentToken = Authentication.generateJWT(differentUser);
+    differentToken = await Authentication.generateJWT(differentUser);
   });
 
   describe('GET /', () => {
@@ -137,6 +153,7 @@ describe(uri, () => {
         email: 'kaching@gmail.com',
         firstName: 'Ka',
         lastName: 'Ching',
+        roleUuid: userRole.get('uuid'),
       });
 
       const testGroup: Group = await Group.create({

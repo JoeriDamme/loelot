@@ -1,6 +1,9 @@
 import { expect } from 'chai';
+import config from 'config';
+import jwt from 'jsonwebtoken';
 import nock from 'nock';
 import request from 'supertest';
+import validateUuid from 'uuid-validate';
 import App from '../../src/app';
 
 describe('/api/auth', () => {
@@ -50,7 +53,7 @@ describe('/api/auth', () => {
 
       expect(response.status).to.eq(200);
       expect(response.body).to.have.all.keys('token', 'user');
-      expect(response.body.user).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'updatedAt',
+      expect(response.body.user).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'roleUuid', 'updatedAt',
       'createdAt');
       expect(response.body.user).to.include({
         displayName: 'Joeri Damme',
@@ -58,10 +61,31 @@ describe('/api/auth', () => {
         firstName: 'Joeri',
         lastName: 'Damme',
       });
-      const uuidv4: RegExp = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
-      expect(uuidv4.test(response.body.user.uuid)).to.be.true;
-      const jwt: RegExp = new RegExp(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/);
-      expect(jwt.test(response.body.token)).to.be.true;
+      expect(validateUuid(response.body.user.uuid, 4)).to.be.true;
+      const jwtRegExp: RegExp = new RegExp(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/);
+      expect(jwtRegExp.test(response.body.token)).to.be.true;
+      const decoded: any = jwt.verify(response.body.token, config.get('jwt.secret') as string);
+      expect(decoded).to.have.all.keys('data', 'permissions', 'roles', 'exp', 'iat');
+      expect(decoded.data).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'roleUuid', 'updatedAt',
+      'createdAt');
+      expect(decoded.data).to.include({
+        displayName: 'Joeri Damme',
+        email: 'test@gmail.com',
+        firstName: 'Joeri',
+        lastName: 'Damme',
+      });
+      expect(decoded.permissions).to.deep.equal([
+        'group:read',
+        'group:write',
+        'invitation:read',
+        'invitation:write',
+        'wishlist:read',
+        'wishlist:write',
+        'user:read',
+      ]);
+      expect(decoded.roles).to.deep.equal(['user']);
+      expect(Number.isInteger(decoded.exp)).to.be.true;
+      expect(Number.isInteger(decoded.iat)).to.be.true;
     });
   });
 });

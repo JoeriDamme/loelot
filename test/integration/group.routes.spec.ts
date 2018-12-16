@@ -9,6 +9,7 @@ import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
 import GroupUser from '../../src/models/groupuser.model';
 import Invitation from '../../src/models/invitation.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 import WishList from '../../src/models/wishlist.model';
 
@@ -18,11 +19,24 @@ describe(uri, () => {
   let expressApp: Express.Application;
   let user: User;
   let token: string;
+  let userRole: Role;
 
   before(async () => {
     const app: App = new App();
     app.start();
     expressApp = app.getExpressApplication();
+
+    const role: Role|null = await Role.findOne({
+      where: {
+        name: 'user',
+      },
+    });
+
+    if (!role) {
+      throw new Error('Can not find Role');
+    }
+
+    userRole = role;
 
     // create user for JWT token
     user = await User.create({
@@ -30,9 +44,10 @@ describe(uri, () => {
       email: 'johndoe@gmail.com',
       firstName: 'John',
       lastName: 'Doe',
+      roleUuid: role.get('uuid'),
     });
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
   });
 
   describe('GET /', () => {
@@ -86,6 +101,7 @@ describe(uri, () => {
         email: 'ownrinor@gmail.com',
         firstName: 'xx',
         lastName: 'yx',
+        roleUuid: userRole.get('uuid'),
       });
 
       const resourceGroup: Group = await Group.create({
@@ -470,6 +486,7 @@ describe(uri, () => {
         email: 'jahnda@gmail.com',
         firstName: 'Jahn',
         lastName: 'Da',
+        roleUuid: userRole.get('uuid'),
       });
 
       const updateGroup: any = {
@@ -576,6 +593,7 @@ describe(uri, () => {
         email: 'xxxx@gmail.com',
         firstName: 'x',
         lastName: 'y',
+        roleUuid: userRole.get('uuid'),
       });
 
       const updateGroup: any = {

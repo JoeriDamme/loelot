@@ -1,7 +1,8 @@
 import Sequelize from 'sequelize';
-import { AllowNull, BelongsToMany, Column, DataType, HasMany, IsEmail, Length, Model, Table } from 'sequelize-typescript';
+import { AllowNull, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, IsEmail, IsUUID, Length, Model, Table } from 'sequelize-typescript';
 import Group from './group.model';
 import GroupUser from './groupuser.model';
+import Role from './role.model';
 
 @Table({
   timestamps: true,
@@ -59,6 +60,17 @@ export default class User extends Model<User> {
 
   @BelongsToMany(() => Group, () => GroupUser)
   public groups: Group[];
+
+  @IsUUID(4)
+  @AllowNull(false)
+  @ForeignKey(() => Role)
+  @Column(DataType.UUID)
+  public roleUuid: string;
+
+  @BelongsTo(() => Role, {
+    constraints: true,
+  })
+  public role: Role;
 
   /**
    * Check if a User is admin of a Group.

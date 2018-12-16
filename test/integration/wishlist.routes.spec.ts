@@ -6,6 +6,7 @@ import validateUuid from 'uuid-validate';
 import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 import WishList from '../../src/models/wishlist.model';
 
@@ -30,12 +31,23 @@ describe(uri, () => {
       where: {},
     });
 
+    const role: Role|null = await Role.findOne({
+      where: {
+        name: 'user',
+      },
+    });
+
+    if (!role) {
+      throw new Error('Can not find Role');
+    }
+
     // create user for JWT token
     user = await User.create({
       displayName: 'Jantje Beton',
       email: 'jantjebeton@gmail.com',
       firstName: 'Jantje',
       lastName: 'Beton',
+      roleUuid: role.get('uuid'),
     });
 
     group = await Group.create({
@@ -47,16 +59,17 @@ describe(uri, () => {
 
     await user.$add('groups', group);
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
 
     differentUser = await User.create({
       displayName: 'Popie Jopie',
       email: 'popiejopie@gmail.com',
       firstName: 'Popie',
       lastName: 'Jopie',
+      roleUuid: role.get('uuid'),
     });
 
-    differentToken = Authentication.generateJWT(differentUser);
+    differentToken = await Authentication.generateJWT(differentUser);
   });
 
   describe('GET /', () => {
