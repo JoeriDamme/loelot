@@ -24,6 +24,11 @@ describe(uri, () => {
     app.start();
     expressApp = app.getExpressApplication();
 
+    // clean up wish lists
+    await WishList.destroy({
+      where: {},
+    });
+
     // create user for JWT token
     user = await User.create({
       displayName: 'Jantje Beton',
