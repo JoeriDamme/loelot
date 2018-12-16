@@ -26,6 +26,7 @@ describe(uri, () => {
 
     // clean up wish lists
     await WishList.destroy({
+      truncate: true,
       where: {},
     });
 
