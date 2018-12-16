@@ -1,8 +1,10 @@
 import Sequelize from 'sequelize';
-import { AllowNull, BeforeBulkUpdate, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, IsUUID,
+import { AllowNull, BeforeBulkUpdate, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, IsUUID,
   Length, Model, Table } from 'sequelize-typescript';
 import GroupUser from './groupuser.model';
+import Invitation from './invitation.model';
 import User from './user.model';
+import WishList from './wishlist.model';
 
 @Table({
   timestamps: true,
@@ -62,4 +64,14 @@ export default class Group extends Model<Group> {
 
   @BelongsToMany(() => User, () => GroupUser)
   public users: User[];
+
+  @HasMany(() => WishList, {
+    foreignKey: 'groupUuid',
+  })
+  public wishLists: WishList[];
+
+  @HasMany(() => Invitation, {
+    foreignKey: 'groupUuid',
+  })
+  public invitations: Invitation[];
 }

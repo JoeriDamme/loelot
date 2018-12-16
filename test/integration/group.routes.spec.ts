@@ -1,5 +1,6 @@
 import bluebird from 'bluebird';
 import { expect } from 'chai';
+import Crypto from 'crypto';
 import moment from 'moment';
 import request from 'supertest';
 import validateUuid from 'uuid-validate';
@@ -7,7 +8,9 @@ import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
 import GroupUser from '../../src/models/groupuser.model';
+import Invitation from '../../src/models/invitation.model';
 import User from '../../src/models/user.model';
+import WishList from '../../src/models/wishlist.model';
 
 const uri: string = '/api/v1/groups';
 
@@ -94,16 +97,69 @@ describe(uri, () => {
 
       await resourceGroup.$set('users', userNew);
 
+      const invitation: Invitation = await Invitation.create({
+        creatorUuid: userNew.get('uuid'),
+        email: 'hey@mailinator.com',
+        expiresAt: moment(),
+        groupUuid: resourceGroup.get('uuid'),
+        sentAt: moment(),
+        timesSent: 1,
+        token: Crypto.randomBytes(48).toString('hex'),
+      });
+
+      const wishList: WishList = await WishList.create({
+        creatorUuid: userNew.get('uuid'),
+        description: 'productje 1',
+        groupUuid: resourceGroup.get('uuid'),
+        rank: 1,
+      });
+
       const response: any = await request(expressApp)
-        .get(`${uri}?include=admin,creator,users`)
+        .get(`${uri}?include=admin,creator,users,wishLists,invitations`)
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.status).to.eq(200);
       expect(response.body).to.have.length(1);
       response.body.forEach((group: any) => {
-        expect(group).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt', 'createdAt', 'users', 'creator', 'admin');
+        expect(group).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt', 'createdAt',
+          'users', 'creator', 'admin', 'invitations', 'wishLists');
+        expect(group.users).to.have.length(1);
+        expect(group.users[0]).to.include({
+          displayName: 'xx yx',
+          email: 'ownrinor@gmail.com',
+          firstName: 'xx',
+          lastName: 'yx',
+          uuid: userNew.get('uuid'),
+        });
+        expect(group.admin).to.include({
+          displayName: 'John Doe',
+          email: 'johndoe@gmail.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          uuid: user.get('uuid'),
+        });
+        expect(group.creator).to.include({
+          displayName: 'John Doe',
+          email: 'johndoe@gmail.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          uuid: user.get('uuid'),
+        });
+        expect(group.invitations).to.have.length(1);
+        expect(group.invitations[0]).to.include({
+          email: 'hey@mailinator.com',
+          timesSent: 1,
+          uuid: invitation.get('uuid'),
+        });
+        expect(group.wishLists).to.have.length(1);
+        expect(group.wishLists[0]).to.include({
+          description: 'productje 1',
+          rank: 1,
+          uuid: wishList.get('uuid'),
+        });
         expect(moment(group.createdAt).isValid()).to.be.true;
         expect(moment(group.updatedAt).isValid()).to.be.true;
+        expect(group.uuid).to.eq(resourceGroup.get('uuid'));
         expect(validateUuid(group.uuid, 4)).to.be.true;
       });
 
