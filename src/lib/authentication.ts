@@ -9,7 +9,7 @@ import User from '../models/user.model';
 import ApplicationError from './errors/application.error';
 import UnauthorizedError from './errors/unauthorized.error';
 
-interface IJWTPayload {
+export interface IJWTPayload {
   data: {
     uuid: string;
   };
@@ -39,6 +39,26 @@ export default class Authentication {
     }, Authentication.getJWTSecret(), {
       expiresIn: '4w',
     });
+  }
+
+  /**
+   * Extract token from bearer authorization header.
+   * @param authorizationHeader authorization header including bearer.
+   */
+  public static getTokenFromAuthorizationHeader(authorizationHeader: string): string {
+    const regex: RegExp = /(\S+)\s+(\S+)/;
+    const token: RegExpMatchArray|null = authorizationHeader.match(regex);
+
+    if (!token || token[1].toLocaleLowerCase() !== 'bearer' || !token[2]) {
+      throw new Error();
+    }
+
+    return token[2];
+  }
+
+  public static decodeJWT(token: string): IJWTPayload {
+    const decoded: IJWTPayload = jwt.verify(token, Authentication.getJWTSecret()) as IJWTPayload;
+    return decoded;
   }
 
   public static validateJWT(request: Request, response: Response, next: NextFunction): void {
