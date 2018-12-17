@@ -50,7 +50,7 @@ export default class Authentication {
     const token: RegExpMatchArray|null = authorizationHeader.match(regex);
 
     if (!token || token[1].toLocaleLowerCase() !== 'bearer' || !token[2]) {
-      throw new Error();
+      throw new UnauthorizedError();
     }
 
     return token[2];
