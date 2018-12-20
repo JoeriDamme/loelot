@@ -19,6 +19,7 @@ describe(uri, () => {
   let group: Group;
   let differentUser: User;
   let differentToken: string;
+  let guestToken: string;
 
   before(async () => {
     const app: App = new App();
@@ -31,15 +32,10 @@ describe(uri, () => {
       where: {},
     });
 
-    const role: Role|null = await Role.findOne({
-      where: {
-        name: 'user',
-      },
-    });
+    const roles: Role[] = await Role.findAll();
 
-    if (!role) {
-      throw new Error('Can not find Role');
-    }
+    const userRole: Role = roles.filter((role: Role) => role.get('name') === 'user')[0];
+    const guestRole: Role = roles.filter((role: Role) => role.get('name') === 'guest')[0];
 
     // create user for JWT token
     user = await User.create({
@@ -47,7 +43,7 @@ describe(uri, () => {
       email: 'jantjebeton@gmail.com',
       firstName: 'Jantje',
       lastName: 'Beton',
-      roleUuid: role.get('uuid'),
+      roleUuid: userRole.get('uuid'),
     });
 
     group = await Group.create({
@@ -66,13 +62,36 @@ describe(uri, () => {
       email: 'popiejopie@gmail.com',
       firstName: 'Popie',
       lastName: 'Jopie',
-      roleUuid: role.get('uuid'),
+      roleUuid: userRole.get('uuid'),
     });
 
     differentToken = await Authentication.generateJWT(differentUser);
+
+    const guest: User = await User.create({
+      displayName: 'Guest User2',
+      email: 'guestuser2@mailinator.com',
+      firstName: 'Guest',
+      lastName: 'Users',
+      roleUuid: guestRole.get('uuid'),
+    });
+
+    guestToken = await Authentication.generateJWT(guest);
   });
 
   describe('GET /', () => {
+    it('should give a forbidden error on guest account', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(response.status).to.eq(403);
+      expect(response.body).to.deep.equal({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
+    });
+
     it('should get all wish lists', async () => {
       const wishlists: any = [
         {

@@ -4,7 +4,7 @@ import ForbiddenError from './errors/forbidden.error';
 import UnauthorizedError from './errors/unauthorized.error';
 
 export default class Authorization {
-  public static isAuthorized(guard: string[]): (request: Request, response: Response, next: NextFunction) => void {
+  public static hasPermission(guard: string[]): (request: Request, response: Response, next: NextFunction) => void {
     return (request: Request, response: Response, next: NextFunction): void => {
       try {
         const authorizationheader: string|undefined = request.header('authorization');

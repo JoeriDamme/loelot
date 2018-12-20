@@ -18,25 +18,21 @@ const uri: string = '/api/v1/groups';
 describe(uri, () => {
   let expressApp: Express.Application;
   let user: User;
+  let guest: User;
   let token: string;
+  let guestToken: string;
   let userRole: Role;
+  let guestRole: Role;
 
   before(async () => {
     const app: App = new App();
     app.start();
     expressApp = app.getExpressApplication();
 
-    const role: Role|null = await Role.findOne({
-      where: {
-        name: 'user',
-      },
-    });
+    const roles: Role[] = await Role.findAll();
 
-    if (!role) {
-      throw new Error('Can not find Role');
-    }
-
-    userRole = role;
+    userRole = roles.filter((role: Role) => role.get('name') === 'user')[0];
+    guestRole = roles.filter((role: Role) => role.get('name') === 'guest')[0];
 
     // create user for JWT token
     user = await User.create({
@@ -44,13 +40,36 @@ describe(uri, () => {
       email: 'johndoe@gmail.com',
       firstName: 'John',
       lastName: 'Doe',
-      roleUuid: role.get('uuid'),
+      roleUuid: userRole.get('uuid'),
     });
 
     token = await Authentication.generateJWT(user);
+
+    guest = await User.create({
+      displayName: 'Guest User',
+      email: 'guestuser1@mailinator.com',
+      firstName: 'Guest',
+      lastName: 'Users',
+      roleUuid: guestRole.get('uuid'),
+    });
+
+    guestToken = await Authentication.generateJWT(guest);
   });
 
   describe('GET /', () => {
+    it('should give a forbidden error on guest account', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(response.status).to.eq(403);
+      expect(response.body).to.deep.equal({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
+    });
+
     it('should return all groups', async () => {
       // let's insert two groups
       const groups: any = [
