@@ -1,0 +1,21 @@
+sudo: true
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+env:
+  global:
+    - DB_HOST=localhost
+    - DB_USER=root
+    - DB_PASS=root
+    - DB_NAME=loelottest
+    - DB_PORT=5432
+    - DB_DIALECT=postgres
+    - NODE_ENV=test
+before_install:
+  - sudo -u postgres psql -c "CREATE USER root WITH PASSWORD 'root'"
+  - sudo -u postgres psql -c "ALTER ROLE root SUPERUSER"
+  - sudo -u postgres psql -c "CREATE DATABASE loelottest"
+  - sudo -u postgres psql loelottest -c 'CREATE EXTENSION "uuid-ossp";'

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/server.ts",
-    "test": "test",
+    "test": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/**/*.spec.ts'",
     "test:unit": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/unit/**/*.spec.ts'",
     "test:integration": "cross-env NODE_ENV=test nyc --require ts-node/register mocha './test/integration/**/*.spec.ts'",
     "dev": "nodemon",
