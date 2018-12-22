@@ -1,5 +1,7 @@
 dist: xenial
 language: node_js
+node_js:
+  - "10"
 addons:
   postgresql: "10"
 apt:
