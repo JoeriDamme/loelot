@@ -21,4 +21,6 @@ env:
     - NODE_ENV=test
 before_install:
   - psql -c 'CREATE DATABASE loelottest;' -U postgres
+  - psql -c "CREATE USER root WITH PASSWORD 'root';" -U postgres
+  - psql -c 'CREATE EXTENSION "uuid-ossp";' -U postgres
   
