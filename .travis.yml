@@ -1,9 +1,13 @@
+dist: xenial
+language: node_js
 addons:
   postgresql: "10"
-  apt:
-    packages:
+apt:
+  packages:
     - postgresql-10
     - postgresql-client-10
+services:
+  - postgresql-10
 env:
   global:
     - DB_HOST=localhost
