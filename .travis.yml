@@ -19,6 +19,8 @@ env:
     - DB_PORT=5432
     - DB_DIALECT=postgres
     - NODE_ENV=test
+    - FACEBOOK_APP_ID=xxx
+    - FACEBOOK_APP_SECRET=xxx
 before_install:
   - psql -c 'CREATE DATABASE loelottest;' -U postgres
   - psql -c "CREATE USER root WITH PASSWORD 'root';" -U postgres
