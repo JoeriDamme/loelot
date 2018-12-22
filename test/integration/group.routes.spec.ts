@@ -9,6 +9,7 @@ import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
 import GroupUser from '../../src/models/groupuser.model';
 import Invitation from '../../src/models/invitation.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 import WishList from '../../src/models/wishlist.model';
 
@@ -17,12 +18,21 @@ const uri: string = '/api/v1/groups';
 describe(uri, () => {
   let expressApp: Express.Application;
   let user: User;
+  let guest: User;
   let token: string;
+  let guestToken: string;
+  let userRole: Role;
+  let guestRole: Role;
 
   before(async () => {
     const app: App = new App();
     app.start();
     expressApp = app.getExpressApplication();
+
+    const roles: Role[] = await Role.findAll();
+
+    userRole = roles.filter((role: Role) => role.get('name') === 'user')[0];
+    guestRole = roles.filter((role: Role) => role.get('name') === 'guest')[0];
 
     // create user for JWT token
     user = await User.create({
@@ -30,12 +40,36 @@ describe(uri, () => {
       email: 'johndoe@gmail.com',
       firstName: 'John',
       lastName: 'Doe',
+      roleUuid: userRole.get('uuid'),
     });
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
+
+    guest = await User.create({
+      displayName: 'Guest User',
+      email: 'guestuser1@mailinator.com',
+      firstName: 'Guest',
+      lastName: 'Users',
+      roleUuid: guestRole.get('uuid'),
+    });
+
+    guestToken = await Authentication.generateJWT(guest);
   });
 
   describe('GET /', () => {
+    it('should give a forbidden error on guest account', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(response.status).to.eq(403);
+      expect(response.body).to.deep.equal({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
+    });
+
     it('should return all groups', async () => {
       // let's insert two groups
       const groups: any = [
@@ -86,6 +120,7 @@ describe(uri, () => {
         email: 'ownrinor@gmail.com',
         firstName: 'xx',
         lastName: 'yx',
+        roleUuid: userRole.get('uuid'),
       });
 
       const resourceGroup: Group = await Group.create({
@@ -470,6 +505,7 @@ describe(uri, () => {
         email: 'jahnda@gmail.com',
         firstName: 'Jahn',
         lastName: 'Da',
+        roleUuid: userRole.get('uuid'),
       });
 
       const updateGroup: any = {
@@ -576,6 +612,7 @@ describe(uri, () => {
         email: 'xxxx@gmail.com',
         firstName: 'x',
         lastName: 'y',
+        roleUuid: userRole.get('uuid'),
       });
 
       const updateGroup: any = {

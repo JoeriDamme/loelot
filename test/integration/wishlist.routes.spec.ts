@@ -6,6 +6,7 @@ import validateUuid from 'uuid-validate';
 import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 import WishList from '../../src/models/wishlist.model';
 
@@ -18,6 +19,7 @@ describe(uri, () => {
   let group: Group;
   let differentUser: User;
   let differentToken: string;
+  let guestToken: string;
 
   before(async () => {
     const app: App = new App();
@@ -30,12 +32,18 @@ describe(uri, () => {
       where: {},
     });
 
+    const roles: Role[] = await Role.findAll();
+
+    const userRole: Role = roles.filter((role: Role) => role.get('name') === 'user')[0];
+    const guestRole: Role = roles.filter((role: Role) => role.get('name') === 'guest')[0];
+
     // create user for JWT token
     user = await User.create({
       displayName: 'Jantje Beton',
       email: 'jantjebeton@gmail.com',
       firstName: 'Jantje',
       lastName: 'Beton',
+      roleUuid: userRole.get('uuid'),
     });
 
     group = await Group.create({
@@ -47,19 +55,43 @@ describe(uri, () => {
 
     await user.$add('groups', group);
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
 
     differentUser = await User.create({
       displayName: 'Popie Jopie',
       email: 'popiejopie@gmail.com',
       firstName: 'Popie',
       lastName: 'Jopie',
+      roleUuid: userRole.get('uuid'),
     });
 
-    differentToken = Authentication.generateJWT(differentUser);
+    differentToken = await Authentication.generateJWT(differentUser);
+
+    const guest: User = await User.create({
+      displayName: 'Guest User2',
+      email: 'guestuser2@mailinator.com',
+      firstName: 'Guest',
+      lastName: 'Users',
+      roleUuid: guestRole.get('uuid'),
+    });
+
+    guestToken = await Authentication.generateJWT(guest);
   });
 
   describe('GET /', () => {
+    it('should give a forbidden error on guest account', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(response.status).to.eq(403);
+      expect(response.body).to.deep.equal({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
+    });
+
     it('should get all wish lists', async () => {
       const wishlists: any = [
         {

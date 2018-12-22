@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 
 describe('/api/v1/users', () => {
@@ -48,13 +49,24 @@ describe('/api/v1/users', () => {
     });
 
     it('should reply with profile of user', async () => {
+      const role: Role|null = await Role.findOne({
+        where: {
+          name: 'user',
+        },
+      });
+
+      if (!role) {
+        throw new Error('Can not find Role');
+      }
+
       const user: User = await User.create({
         displayName: 'John Doe',
         email: 'johndoe@gmail.com',
         firstName: 'John',
         lastName: 'Doe',
+        roleUuid: role.get('uuid'),
       });
-      const token: string = Authentication.generateJWT(user);
+      const token: string = await Authentication.generateJWT(user);
       const response: any = await request(expressApp).get(`${uri}/me`).set('Authorization', `Bearer ${token}`);
       expect(response.status).to.eq(200);
       expect(response.body).to.include({
@@ -63,8 +75,36 @@ describe('/api/v1/users', () => {
         firstName: 'John',
         lastName: 'Doe',
       });
-      expect(response.body).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'updatedAt',
+      expect(response.body).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'roleUuid', 'updatedAt',
       'createdAt');
+    });
+
+    it('should reply with forbidden if no permission', async () => {
+      const role: Role|null = await Role.findOne({
+        where: {
+          name: 'guest',
+        },
+      });
+
+      if (!role) {
+        throw new Error('Can not find Role');
+      }
+
+      const user: User = await User.create({
+        displayName: 'Guest',
+        email: 'guestuser@gmail.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        roleUuid: role.get('uuid'),
+      });
+      const token: string = await Authentication.generateJWT(user);
+      const response: any = await request(expressApp).get(`${uri}/me`).set('Authorization', `Bearer ${token}`);
+      expect(response.status).to.eq(403);
+      expect(response.body).to.include({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
     });
   });
 });

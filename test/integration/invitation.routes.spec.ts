@@ -8,6 +8,7 @@ import App from '../../src/app';
 import Authentication from '../../src/lib/authentication';
 import Group from '../../src/models/group.model';
 import Invitation from '../../src/models/invitation.model';
+import Role from '../../src/models/role.model';
 import User from '../../src/models/user.model';
 
 const uri: string = '/api/v1/invitations';
@@ -19,6 +20,9 @@ describe(uri, () => {
   let group: Group;
   let differentUser: User;
   let differentToken: string;
+  let guest: User;
+  let guestToken: string;
+  let userRole: Role;
 
   before(async () => {
     const app: App = new App();
@@ -31,12 +35,18 @@ describe(uri, () => {
       where: {},
     });
 
+    const roles: Role[] = await Role.findAll();
+
+    userRole = roles.filter((role: Role) => role.get('name') === 'user')[0];
+    const guestRole: Role = roles.filter((role: Role) => role.get('name') === 'guest')[0];
+
     // create user for JWT token
     user = await User.create({
       displayName: 'Henkie Tankie',
       email: 'hankietankie@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
+      roleUuid: userRole.get('uuid'),
     });
 
     group = await Group.create({
@@ -48,19 +58,43 @@ describe(uri, () => {
 
     await user.$add('groups', group);
 
-    token = Authentication.generateJWT(user);
+    token = await Authentication.generateJWT(user);
 
     differentUser = await User.create({
       displayName: 'Henkie Tankie',
       email: 'hankietankie@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
+      roleUuid: userRole.get('uuid'),
     });
 
-    differentToken = Authentication.generateJWT(differentUser);
+    differentToken = await Authentication.generateJWT(differentUser);
+
+    guest = await User.create({
+      displayName: 'Guest User2',
+      email: 'guestuser2@mailinator.com',
+      firstName: 'Guest',
+      lastName: 'Users',
+      roleUuid: guestRole.get('uuid'),
+    });
+
+    guestToken = await Authentication.generateJWT(guest);
   });
 
   describe('GET /', () => {
+    it('should give a forbidden error on guest account', async () => {
+      const response: any = await request(expressApp)
+        .get(`${uri}`)
+        .set('Authorization', `Bearer ${guestToken}`);
+
+      expect(response.status).to.eq(403);
+      expect(response.body).to.deep.equal({
+        message: 'Forbidden',
+        name: 'ForbiddenError',
+        status: 403,
+      });
+    });
+
     it('should get all invitations', async () => {
       const invitations: any = [
         {
@@ -137,6 +171,7 @@ describe(uri, () => {
         email: 'kaching@gmail.com',
         firstName: 'Ka',
         lastName: 'Ching',
+        roleUuid: userRole.get('uuid'),
       });
 
       const testGroup: Group = await Group.create({

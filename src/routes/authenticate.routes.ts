@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import passport from 'passport';
 import Authentication from '../lib/authentication';
+import ApplicationError from '../lib/errors/application.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
 
 export const authenticationRoutes: Router = Router()
   .get('/facebook', (request: Request, response: Response, next: NextFunction) => {
     passport.authenticate('facebook-token', {
       session: false,
-    }, (err: Error, user: any, info: any) => {
+    }, async (err: Error, user: any, info: any) => {
       if (err) {
         const unauthorized: UnauthorizedError = new UnauthorizedError(err.message);
         return response.status(unauthorized.status).json(unauthorized);
@@ -16,7 +17,12 @@ export const authenticationRoutes: Router = Router()
         return response.status(unauthorized.status).json(unauthorized);
       }
 
-      const token: string = Authentication.generateJWT(user);
+      let token: string;
+      try {
+        token = await Authentication.generateJWT(user);
+      } catch (error) {
+        return new ApplicationError(error.message);
+      }
 
       return response.json({
         token,
