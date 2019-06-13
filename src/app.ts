@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import express, { NextFunction, Request, Response, Router } from 'express';
 import httpContext from 'express-http-context';
 import http from 'http';
@@ -103,6 +104,7 @@ export default class App {
    *
    */
   private setExpressConfiguration(): void {
+    this.app.use(cors());
     // Share uniqid through app, usefull for logging.
     this.app.use(httpContext.middleware);
     this.app.use((request: Request, response: Response, next: NextFunction) => {
