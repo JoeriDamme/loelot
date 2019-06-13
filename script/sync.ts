@@ -1,7 +1,9 @@
+import bluebird from 'bluebird';
 import dotenv from 'dotenv';
 dotenv.config();
 import config from 'config';
 import { Sequelize } from 'sequelize-typescript';
+import Role from '../src/models/role.model';
 
 const sequelize: Sequelize = new Sequelize({
   database: config.get('database.name') as string,
@@ -14,6 +16,39 @@ const sequelize: Sequelize = new Sequelize({
   username: process.env.DB_USER as string,
 });
 
+// roles
+const roles: any = [
+  {
+    name: 'admin',
+    permissions: [
+      'group:read',
+      'group:write',
+      'invitation:read',
+      'invitation:write',
+      'wishlist:read',
+      'wishlist:write',
+      'user:read',
+      'user:write',
+    ],
+  },
+  {
+    name: 'user',
+    permissions: [
+      'group:read',
+      'group:write',
+      'invitation:read',
+      'invitation:write',
+      'wishlist:read',
+      'wishlist:write',
+      'user:read',
+    ],
+  },
+  {
+    name: 'guest',
+    permissions: [],
+  },
+];
+
 class Sync {
   public static async init(): Promise<void> {
     try {
@@ -21,9 +56,14 @@ class Sync {
       await sequelize.sync({
         force: true,
       });
+      await Sync.createRoles();
     } catch (error) {
       throw error;
     }
+  }
+
+  public static async createRoles(): Promise<any[]> {
+    return bluebird.each(roles, (role: any) => Role.create(role));
   }
 }
 

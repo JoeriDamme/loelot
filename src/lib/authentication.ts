@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import FacebookTokenStrategy, { Profile, VerifyFunction } from 'passport-facebook-token';
 import { ExtractJwt, Strategy as JWTStrategy, VerifiedCallback } from 'passport-jwt';
+import { logger } from '../lib/winston';
 import Role from '../models/role.model';
 import User from '../models/user.model';
 import ApplicationError from './errors/application.error';
@@ -32,6 +33,7 @@ export default class Authentication {
       throw new ApplicationError('Could not find Role for generating token');
     }
 
+    logger.info(`Signing JWT token for user: ${user.get('uuid')}, role: ${role.get('name')}`);
     return jwt.sign({
       data: user.toJSON(),
       permissions: role.get('permissions'),
@@ -105,6 +107,7 @@ export default class Authentication {
       clientID: process.env.FACEBOOK_APP_ID as string,
       clientSecret: process.env.FACEBOOK_APP_SECRET as string,
     }, async (accessToken: string, refreshToken: string, profile: Profile, done: any): Promise<VerifyFunction> => {
+      logger.info('Successfully authenticated on facebook');
       // check if User exists, or create
       try {
         const role: Role|null = await Role.findOne({
@@ -130,6 +133,7 @@ export default class Authentication {
           },
         });
 
+        logger.info(`Created new user: ${result[1]}. User uuid: ${result[0].get('uuid')}`);
         const user: User = result[0];
         return done(null, user);
       } catch (error) {
