@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response} from 'express';
+import { logger } from '../lib/winston';
 import Authentication, { IJWTPayload } from './authentication';
 import ForbiddenError from './errors/forbidden.error';
 import UnauthorizedError from './errors/unauthorized.error';
@@ -15,6 +16,8 @@ export default class Authorization {
         // extract token from 'Bearer xxx' string and decode it for permissions
         const jwt: string = Authentication.getTokenFromAuthorizationHeader(authorizationheader);
         const payload: IJWTPayload = Authentication.decodeJWT(jwt);
+
+        logger.info(`Checking guard(s) ${guard.join(', ')} for user ${payload.data.uuid} on route ${request.originalUrl}`);
         const allowed: boolean = guard.some((check: string) => payload.permissions.includes(check));
 
         if (allowed) {

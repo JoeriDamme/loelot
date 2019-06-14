@@ -74,6 +74,7 @@ export default class Authentication {
         const unauthorized: UnauthorizedError = new UnauthorizedError(info.message);
         return response.status(unauthorized.status).json(unauthorized);
       }
+      logger.info(`JWT is valid. User ${user.get('uuid')}`);
       request.user = user;
       return next();
     })(request, response, next);
