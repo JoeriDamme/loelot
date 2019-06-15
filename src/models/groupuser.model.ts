@@ -7,18 +7,12 @@ export default class GroupUser extends Model {
     GroupUser.init({
       groupUuid: {
         allowNull: false,
-        // references: {
-        //   key: 'uuid',
-        //   model: Group,
-        // },
+        primaryKey: true,
         type: DataTypes.UUID,
       },
       userUuid: {
         allowNull: false,
-        // references: {
-        //   key: 'uuid',
-        //   model: User,
-        // },
+        primaryKey: true,
         type: DataTypes.UUID,
       },
     }, {

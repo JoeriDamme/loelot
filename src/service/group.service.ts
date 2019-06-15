@@ -1,3 +1,4 @@
+import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 import Invitation from '../models/invitation.model';
@@ -12,12 +13,12 @@ export interface IGroupAttributes {
 }
 
 interface IGroupAssociation {
-  as: string;
-  model: any;
+  query: string;
+  model: Association;
 }
 
 interface IGroupQueryOptions {
-  include: IGroupAssociation[];
+  include: Includeable[];
 }
 
 export default class GroupService {
@@ -86,7 +87,7 @@ export default class GroupService {
     };
     if (options.include) {
       options.include.split(',').forEach((inclusion: string) => {
-        const relationship: IGroupAssociation = GroupService.getIncludeOption(inclusion);
+        const relationship: Includeable = GroupService.getIncludeOption(inclusion);
         if (relationship) {
           result.include.push(relationship);
         }
@@ -99,24 +100,23 @@ export default class GroupService {
    * Generate include for query options.
    * @param model
    */
-  private static getIncludeOption(model: string): IGroupAssociation {
+  private static getIncludeOption(find: string): Includeable {
     const associations: IGroupAssociation[] = [{
-      as: 'admin',
-      model: User,
+      model: Group.associations.admin,
+      query: 'admin',
     }, {
-      as: 'creator',
-      model: User,
+      model: Group.associations.creator,
+      query: 'creator',
     }, {
-      as: 'users',
-      model: User,
+      model: Group.associations.users,
+      query: 'users',
     }, {
-      as: 'wishLists',
-      model: WishList,
+      model: Group.associations.wishLists,
+      query: 'wishLists',
     }, {
-      as: 'invitations',
-      model: Invitation,
+      model: Group.associations.invitations,
+      query: 'invitations',
     }];
-
-    return associations.filter((association: IGroupAssociation) => association.as === model)[0];
+    return associations.filter((association: IGroupAssociation) => association.query === find)[0].model;
   }
 }

@@ -15,6 +15,7 @@ import {
   HasManyHasAssociationMixin,
   Model,
   Sequelize,
+  UpdateOptions,
 } from 'sequelize';
 import Invitation from './invitation.model';
 import User from './user.model';
@@ -59,17 +60,25 @@ export default class Group extends Model {
         type: DataTypes.UUID,
       },
     }, {
+      hooks: {
+        beforeBulkUpdate: (instance: any): void => {
+          delete instance.attributes.uuid;
+          return;
+        },
+      },
       sequelize,
     });
   }
 
   public static relations(): void {
     Group.belongsTo(User, {
+      as: 'creator',
       foreignKey: 'creatorUuid',
       targetKey: 'uuid',
     });
 
     Group.belongsTo(User, {
+      as: 'admin',
       foreignKey: 'adminUuid',
       targetKey: 'uuid',
     });

@@ -130,7 +130,7 @@ describe(uri, () => {
         name: 'lol',
       });
 
-      await resourceGroup.$set('users', userNew);
+      await resourceGroup.addUser(userNew);
 
       const invitation: Invitation = await Invitation.create({
         creatorUuid: userNew.get('uuid'),
@@ -235,7 +235,7 @@ describe(uri, () => {
 
       const resource: Group = await Group.create(group);
 
-      await resource.$set('users', user);
+      await resource.addUser(user);
 
       const response: any = await request(expressApp)
         .get(`${uri}/${resource.get('uuid')}?include=admin,creator,users`)
@@ -348,8 +348,8 @@ describe(uri, () => {
       expect(response.status).to.eq(400);
       expect(response.body).to.deep.equal({
         errors: [
-          { message: 'Validation len on name failed', property: 'name' },
           { message: 'Validation len on icon failed', property: 'icon' },
+          { message: 'Validation len on name failed', property: 'name' },
         ],
         message: 'Validation error',
         name: 'BadRequestError',
@@ -448,8 +448,8 @@ describe(uri, () => {
       expect(response.status).to.eq(400);
       expect(response.body).to.deep.equal({
         errors: [
-          { message: 'Validation len on name failed', property: 'name' },
           { message: 'Validation len on icon failed', property: 'icon' },
+          { message: 'Validation len on name failed', property: 'name' },
         ],
         message: 'Validation error',
         name: 'BadRequestError',
