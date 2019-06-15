@@ -2,17 +2,7 @@ import {
   Association,
   BelongsToCreateAssociationMixin,
   BelongsToGetAssociationMixin,
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyCountAssociationsMixin,
-  BelongsToManyCreateAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
-  BelongsToManyHasAssociationMixin,
   DataTypes,
-  HasManyAddAssociationMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
   Model,
   Sequelize,
 } from 'sequelize';
@@ -98,59 +88,3 @@ export default class WishList extends Model {
   public getCreator: BelongsToGetAssociationMixin<User>;
   public createCreator: BelongsToCreateAssociationMixin<User>;
 }
-
-// @Table({
-//   timestamps: true,
-// })
-// export default class WishList extends Model<WishList> {
-//   @BeforeBulkUpdate
-//   public static removeReadOnly(instance: any): void {
-//     delete instance.attributes.uuid;
-//     delete instance.attributes.groupUuid;
-//     delete instance.attributes.creatorUuid;
-//   }
-
-//   @Column({
-//     defaultValue: Sequelize.fn('uuid_generate_v4'),
-//     primaryKey: true,
-//     type: DataType.UUID,
-//   })
-//   public uuid: string;
-
-//   @IsUUID(4)
-//   @AllowNull(false)
-//   @ForeignKey(() => Group)
-//   @Column(DataType.UUID)
-//   public groupUuid: string;
-
-//   @BelongsTo(() => Group, {
-//     constraints: true,
-//   })
-//   public group: Group;
-
-//   @IsUUID(4)
-//   @AllowNull(false)
-//   @ForeignKey(() => User)
-//   @Column(DataType.UUID)
-//   public creatorUuid: string;
-
-//   @BelongsTo(() => User, {
-//     constraints: true,
-//   })
-//   public creator: User;
-
-//   @Length({
-//     max: 512,
-//     min: 1,
-//   })
-//   @AllowNull(false)
-//   @Column(DataType.TEXT)
-//   public description: string;
-
-//   @Min(0)
-//   @Max(255)
-//   @IsInt
-//   @AllowNull(false)
-//   @Column(DataType.INTEGER)
-//   public rank: number;
-// }
