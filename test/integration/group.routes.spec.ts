@@ -510,7 +510,7 @@ describe(uri, () => {
 
       const updateGroup: any = {
         adminUuid: updateUser.get('uuid'),
-        creatorUuid: updateUser.get('uuid'),
+        creatorUuid: updateUser.get('uuid'), // should be ignored
         icon: 'http://www.imgur.com/new.jpg',
         name: 'new lol',
         uuid: '2f9db767-3019-4120-a07e-1d79da925021', // should be ignored
@@ -524,11 +524,13 @@ describe(uri, () => {
 
       delete updateGroup.zork;
       delete updateGroup.uuid;
+      delete updateGroup.creatorUuid;
       expect(response.status).to.eq(200);
       expect(response.body).to.include(updateGroup);
       expect(response.body).to.have.all.keys('uuid', 'name', 'icon', 'adminUuid', 'creatorUuid', 'updatedAt',
       'createdAt');
       expect(response.body.uuid).to.eq(resource.get('uuid'));
+      expect(response.body.creatorUuid).to.eq(resource.get('creatorUuid'));
       expect(moment(response.body.createdAt).isValid()).to.be.true;
       expect(moment(response.body.updatedAt).isValid()).to.be.true;
       expect(validateUuid(response.body.uuid, 4)).to.be.true;

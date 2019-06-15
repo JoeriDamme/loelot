@@ -63,6 +63,7 @@ export default class Group extends Model {
       hooks: {
         beforeBulkUpdate: (instance: any): void => {
           delete instance.attributes.uuid;
+          delete instance.attributes.creatorUuid;
           return;
         },
       },
@@ -103,8 +104,8 @@ export default class Group extends Model {
     });
   }
 
-  public uuid: string;
-  public creatorUuid: string;
+  public readonly uuid: string;
+  public readonly creatorUuid: string;
   public adminUuid: string;
   public name: string;
   public readonly createdAt: Date;
