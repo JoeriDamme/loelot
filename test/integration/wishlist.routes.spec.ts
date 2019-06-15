@@ -53,7 +53,7 @@ describe(uri, () => {
       name: 'Groep met Jan en zijn vrienden',
     });
 
-    await user.$add('groups', group);
+    await user.addGroup(group);
 
     token = await Authentication.generateJWT(user);
 

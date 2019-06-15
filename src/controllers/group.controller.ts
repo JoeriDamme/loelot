@@ -31,7 +31,7 @@ export default class GroupController {
       const resource: Group = await GroupService.create(data);
 
       // Add jwt user to group
-      await resource.$set('users', request.user);
+      await resource.addUser(request.user);
       return response.status(201).json(resource);
     } catch (error) {
       return next(error);

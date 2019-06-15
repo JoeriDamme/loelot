@@ -1,16 +1,29 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
-import Group from './group.model';
-import User from './user.model';
+import { DataTypes, Model, Sequelize } from 'sequelize';
 
-@Table({
-  timestamps: true,
-})
-export default class GroupUser extends Model<GroupUser> {
-  @ForeignKey(() => Group)
-  @Column(DataType.UUID)
-  public groupUuid: string;
+export default class GroupUser extends Model {
+  public static attach(sequelize: Sequelize): void {
+    GroupUser.init({
+      groupUuid: {
+        allowNull: false,
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+      userUuid: {
+        allowNull: false,
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
 
-  @ForeignKey(() => User)
-  @Column(DataType.UUID)
-  public userUuid: string;
+  public static relations(): void {
+    return;
+  }
+
+  public readonly groupUuid: string;
+  public readonly userUuid: string;
+  public readonly createdAt: Date;
+  public readonly updatedAt: Date;
 }

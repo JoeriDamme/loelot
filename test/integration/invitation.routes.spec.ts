@@ -43,7 +43,7 @@ describe(uri, () => {
     // create user for JWT token
     user = await User.create({
       displayName: 'Henkie Tankie',
-      email: 'hankietankie@gmail.com',
+      email: 'hankietankie43743@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
       roleUuid: userRole.get('uuid'),
@@ -56,13 +56,13 @@ describe(uri, () => {
       name: 'Groep met vrienden',
     });
 
-    await user.$add('groups', group);
+    await user.addGroup(group);
 
     token = await Authentication.generateJWT(user);
 
     differentUser = await User.create({
       displayName: 'Henkie Tankie',
-      email: 'hankietankie@gmail.com',
+      email: 'hankietankie9874@gmail.com',
       firstName: 'Henkie',
       lastName: 'Tankie',
       roleUuid: userRole.get('uuid'),
@@ -72,7 +72,7 @@ describe(uri, () => {
 
     guest = await User.create({
       displayName: 'Guest User2',
-      email: 'guestuser2@mailinator.com',
+      email: 'guestuser32727@mailinator.com',
       firstName: 'Guest',
       lastName: 'Users',
       roleUuid: guestRole.get('uuid'),
@@ -333,7 +333,7 @@ describe(uri, () => {
       });
       expect(response.body.creator).to.include({
         displayName: 'Henkie Tankie',
-        email: 'hankietankie@gmail.com',
+        email: 'hankietankie43743@gmail.com',
         firstName: 'Henkie',
         lastName: 'Tankie',
       });

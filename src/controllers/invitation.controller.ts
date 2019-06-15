@@ -6,6 +6,7 @@ import BadRequestError from '../lib/errors/bad-request.error';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
 import SequelizeUtility from '../lib/sequelize-utility';
+import Group from '../models/group.model';
 import Invitation from '../models/invitation.model';
 import InvitationService, { IInvitationAttributes } from '../service/invitation.service';
 
@@ -148,7 +149,14 @@ export default class InvitationController {
         throw new BadRequestError();
       }
 
-      const result: boolean = await request.user.isMemberGroup(groupUuid);
+      const group: Group|null = await Group.findByPk(groupUuid);
+
+      if (!group) {
+        // Group not found, but showing not found error can expose data.
+        throw new UnauthorizedError();
+      }
+
+      const result: boolean = await request.user.isMemberGroup(group);
 
       if (!result) {
         throw new UnauthorizedError();

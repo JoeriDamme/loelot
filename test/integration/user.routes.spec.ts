@@ -61,7 +61,7 @@ describe('/api/v1/users', () => {
 
       const user: User = await User.create({
         displayName: 'John Doe',
-        email: 'johndoe@gmail.com',
+        email: 'johndoe8765@gmail.com',
         firstName: 'John',
         lastName: 'Doe',
         roleUuid: role.get('uuid'),
@@ -71,7 +71,7 @@ describe('/api/v1/users', () => {
       expect(response.status).to.eq(200);
       expect(response.body).to.include({
         displayName: 'John Doe',
-        email: 'johndoe@gmail.com',
+        email: 'johndoe8765@gmail.com',
         firstName: 'John',
         lastName: 'Doe',
       });

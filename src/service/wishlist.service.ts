@@ -1,3 +1,4 @@
+import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 import User from '../models/user.model';
@@ -11,12 +12,12 @@ interface IWishListAttributes {
 }
 
 interface IWishlistAssociation {
-  as: string;
-  model: any;
+  model: Association;
+  query: string;
 }
 
 interface IWishListQueryOptions {
-  include: IWishlistAssociation[];
+  include: Includeable[];
 }
 
 export default class WishListService {
@@ -90,7 +91,7 @@ export default class WishListService {
     };
     if (options.include) {
       options.include.split(',').forEach((inclusion: string) => {
-        const relationship: IWishlistAssociation = WishListService.getIncludeOption(inclusion);
+        const relationship: Includeable = WishListService.getIncludeOption(inclusion);
         if (relationship) {
           result.include.push(relationship);
         }
@@ -103,15 +104,15 @@ export default class WishListService {
    * Generate include for query options.
    * @param model
    */
-  private static getIncludeOption(model: string): IWishlistAssociation {
+  private static getIncludeOption(find: string): Includeable {
     const associations: IWishlistAssociation[] = [{
-      as: 'group',
-      model: Group,
+      model: WishList.associations.group,
+      query: 'group',
     }, {
-      as: 'creator',
-      model: User,
+      model: WishList.associations.creator,
+      query: 'creator',
     }];
 
-    return associations.filter((association: IWishlistAssociation) => association.as === model)[0];
+    return associations.filter((association: IWishlistAssociation) => association.query === find)[0].model;
   }
 }

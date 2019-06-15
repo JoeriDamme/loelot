@@ -2,18 +2,16 @@ import bluebird from 'bluebird';
 import dotenv from 'dotenv';
 dotenv.config();
 import config from 'config';
-import { Sequelize } from 'sequelize-typescript';
+import { Op, Sequelize } from 'sequelize';
 import Role from '../src/models/role.model';
 
-const sequelize: Sequelize = new Sequelize({
-  database: config.get('database.name') as string,
-  dialect: process.env.DB_DIALECT as string,
+const sequelize: Sequelize = new Sequelize(config.get('database.name'), process.env.DB_USER as string, process.env.DB_PASS as string, {
+  dialect: 'postgres',
   host: process.env.DB_HOST as string,
-  modelPaths: [`${__dirname}/../src/models/*.model.ts`],
-  operatorsAliases: Sequelize.Op as any,
-  password: process.env.DB_PASS as string,
+  logging: false,
+  operatorsAliases: Op,
   port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER as string,
+  timezone: '+01:00',
 });
 
 // roles
