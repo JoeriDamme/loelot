@@ -24,9 +24,8 @@ export default class GroupUser extends Model {
     return;
   }
 
-  public uuid: string;
-  public groupUuid: string;
-  public userUuid: string;
+  public readonly groupUuid: string;
+  public readonly userUuid: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 }
