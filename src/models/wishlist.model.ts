@@ -84,10 +84,10 @@ export default class WishList extends Model {
     });
   }
 
-  public uuid: string;
-  public creatorUuid: string;
+  public readonly uuid: string;
+  public readonly creatorUuid: string;
   public description: string;
-  public groupUuid: string;
+  public readonly groupUuid: string;
   public rank: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;

@@ -40,6 +40,7 @@ export default class User extends Model {
       email: {
         allowNull: false,
         type: DataTypes.STRING(255),
+        unique: true,
         validate: {
           isEmail: true,
           len: [1, 255],
@@ -69,6 +70,14 @@ export default class User extends Model {
         type: DataTypes.UUID,
       },
     }, {
+      hooks: {
+        beforeBulkUpdate: (instance: any): void => {
+          // not possible to update the following attributes
+          delete instance.attributes.uuid;
+          delete instance.attributes.email;
+          return;
+        },
+      },
       sequelize,
     });
   }
@@ -99,11 +108,11 @@ export default class User extends Model {
     });
   }
 
-  public uuid: string;
+  public readonly uuid: string;
   public firstName: string;
   public lastName: string;
   public displayName: string;
-  public email: string;
+  public readonly email: string;
   public roleUuid: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
