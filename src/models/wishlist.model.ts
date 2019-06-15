@@ -3,6 +3,37 @@ import Group from './group.model';
 import User from './user.model';
 
 export default class WishList extends Model {
+  public static attach(sequelize: Sequelize): void {
+    WishList.init({
+      creatorUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      description: {
+        allowNull: false,
+        type: DataTypes.TEXT(),
+        validate: {
+          len: [1, 512],
+        },
+      },
+      groupUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      rank: {
+        allowNull: false,
+        type: DataTypes.INTEGER(),
+      },
+      uuid: {
+        defaultValue: Sequelize.fn('uuid_generate_v4'),
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
+
   public uuid: string;
   public creatorUuid: string;
   public description: string;
@@ -10,37 +41,6 @@ export default class WishList extends Model {
   public rank: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
-}
-
-export function init(sequelize: Sequelize): void {
-  WishList.init({
-    creatorUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    description: {
-      allowNull: false,
-      type: DataTypes.TEXT(),
-      validate: {
-        len: [1, 512],
-      },
-    },
-    groupUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    rank: {
-      allowNull: false,
-      type: DataTypes.INTEGER(),
-    },
-    uuid: {
-      defaultValue: Sequelize.fn('uuid_generate_v4'),
-      primaryKey: true,
-      type: DataTypes.UUIDV4,
-    },
-  }, {
-    sequelize,
-  });
 }
 
 // @Table({

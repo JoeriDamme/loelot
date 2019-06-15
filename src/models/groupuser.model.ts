@@ -3,6 +3,21 @@ import Group from './group.model';
 import User from './user.model';
 
 export default class GroupUser extends Model {
+  public static attach(sequelize: Sequelize): void {
+    GroupUser.init({
+      groupUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      userUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
+
   public uuid: string;
   public groupUuid: string;
   public userUuid: string;
@@ -10,20 +25,6 @@ export default class GroupUser extends Model {
   public readonly updatedAt: Date;
 }
 
-export function init(sequelize: Sequelize): void {
-  GroupUser.init({
-    groupUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    userUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-  }, {
-    sequelize,
-  });
-}
 // @Table({
 //   timestamps: true,
 // })

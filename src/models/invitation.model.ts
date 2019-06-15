@@ -3,6 +3,54 @@ import Group from './group.model';
 import User from './user.model';
 
 export default class Invitation extends Model {
+  public static attach(sequelize: Sequelize): void {
+    Invitation.init({
+      creatorUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      email: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          isEmail: true,
+          len: [1, 255],
+        },
+      },
+      expiresAt: {
+        allowNull: false,
+        type: DataTypes.DATE(),
+      },
+      groupUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      sentAt: {
+        allowNull: false,
+        type: DataTypes.DATE(),
+      },
+      timesSent: {
+        allowNull: false,
+        type: DataTypes.INTEGER(),
+        validate: {
+          max: 99,
+          min: 1,
+        },
+      },
+      token: {
+        allowNull: false,
+        type: DataTypes.STRING(96),
+      },
+      uuid: {
+        defaultValue: Sequelize.fn('uuid_generate_v4'),
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
+
   public uuid: string;
   public groupUuid: string;
   public creatorUuid: string;
@@ -12,54 +60,6 @@ export default class Invitation extends Model {
   public token: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
-}
-
-export function init(sequelize: Sequelize): void {
-  Invitation.init({
-    creatorUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    email: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        isEmail: true,
-        len: [1, 255],
-      },
-    },
-    expiresAt: {
-      allowNull: false,
-      type: DataTypes.DATE(),
-    },
-    groupUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    sentAt: {
-      allowNull: false,
-      type: DataTypes.DATE(),
-    },
-    timesSent: {
-      allowNull: false,
-      type: DataTypes.INTEGER(),
-      validate: {
-        max: 99,
-        min: 1,
-      },
-    },
-    token: {
-      allowNull: false,
-      type: DataTypes.STRING(96),
-    },
-    uuid: {
-      defaultValue: Sequelize.fn('uuid_generate_v4'),
-      primaryKey: true,
-      type: DataTypes.UUIDV4,
-    },
-  }, {
-    sequelize,
-  });
 }
 
 // @DefaultScope({

@@ -1,6 +1,29 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
 
 export default class Role extends Model {
+  public static attach(sequelize: Sequelize): void {
+    Role.init({
+      name: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          len: [1, 255],
+        },
+      },
+      permissions: {
+        allowNull: false,
+        type: DataTypes.ARRAY(DataTypes.STRING),
+      },
+      uuid: {
+        defaultValue: Sequelize.fn('uuid_generate_v4'),
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
+
   public uuid: string;
   public name: string;
   public permissions: string[];
@@ -8,28 +31,28 @@ export default class Role extends Model {
   public readonly updatedAt: Date;
 }
 
-export function init(sequelize: Sequelize): void {
-  Role.init({
-    name: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        len: [1, 255],
-      },
-    },
-    permissions: {
-      allowNull: false,
-      type: DataTypes.ARRAY(DataTypes.STRING),
-    },
-    uuid: {
-      defaultValue: Sequelize.fn('uuid_generate_v4'),
-      primaryKey: true,
-      type: DataTypes.UUIDV4,
-    },
-  }, {
-    sequelize,
-  });
-}
+// export function init(sequelize: Sequelize): void {
+//   Role.init({
+//     name: {
+//       allowNull: false,
+//       type: DataTypes.STRING(255),
+//       validate: {
+//         len: [1, 255],
+//       },
+//     },
+//     permissions: {
+//       allowNull: false,
+//       type: DataTypes.ARRAY(DataTypes.STRING),
+//     },
+//     uuid: {
+//       defaultValue: Sequelize.fn('uuid_generate_v4'),
+//       primaryKey: true,
+//       type: DataTypes.UUID,
+//     },
+//   }, {
+//     sequelize,
+//   });
+// }
 // @Table({
 //   timestamps: true,
 // })

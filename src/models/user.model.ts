@@ -4,6 +4,51 @@ import GroupUser from './groupuser.model';
 import Role from './role.model';
 
 export default class User extends Model {
+  public static attach(sequelize: Sequelize): void {
+    User.init({
+      displayName: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          len: [1, 255],
+        },
+      },
+      email: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          isEmail: true,
+          len: [1, 255],
+        },
+      },
+      firstName: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          len: [1, 255],
+        },
+      },
+      lastName: {
+        allowNull: false,
+        type: DataTypes.STRING(255),
+        validate: {
+          len: [1, 255],
+        },
+      },
+      roleUuid: {
+        allowNull: false,
+        type: DataTypes.UUID,
+      },
+      uuid: {
+        defaultValue: Sequelize.fn('uuid_generate_v4'),
+        primaryKey: true,
+        type: DataTypes.UUID,
+      },
+    }, {
+      sequelize,
+    });
+  }
+
   public uuid: string;
   public firstName: string;
   public lastName: string;
@@ -12,51 +57,6 @@ export default class User extends Model {
   public roleUuid: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
-}
-
-export function init(sequelize: Sequelize): void {
-  User.init({
-    displayName: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        len: [1, 255],
-      },
-    },
-    email: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        isEmail: true,
-        len: [1, 255],
-      },
-    },
-    firstName: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        len: [1, 255],
-      },
-    },
-    lastName: {
-      allowNull: false,
-      type: DataTypes.STRING(255),
-      validate: {
-        len: [1, 255],
-      },
-    },
-    roleUuid: {
-      allowNull: false,
-      type: DataTypes.UUIDV4,
-    },
-    uuid: {
-      defaultValue: Sequelize.fn('uuid_generate_v4'),
-      primaryKey: true,
-      type: DataTypes.UUIDV4,
-    },
-  }, {
-    sequelize,
-  });
 }
 
 // @Table({
