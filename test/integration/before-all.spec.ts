@@ -23,7 +23,7 @@ import User from '../../src/models/user.model';
 const sequelize: Sequelize = new Sequelize(config.get('database.name'), process.env.DB_USER as string, process.env.DB_PASS as string, {
   dialect: 'postgres',
   host: process.env.DB_HOST as string,
-  logging: (q: string): void => console.log(q),
+  logging: false,
   operatorsAliases: Op,
   port: Number(process.env.DB_PORT),
   timezone: '+01:00',

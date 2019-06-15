@@ -69,23 +69,47 @@ export default class Invitation extends Model {
         type: DataTypes.UUID,
       },
     }, {
+      defaultScope: {
+        attributes: {
+          exclude: ['token', 'expiresAt'],
+        },
+      },
+      hooks: {
+        beforeBulkUpdate: (instance: any): void => {
+          // not possible to update the following attributes
+          delete instance.attributes.uuid;
+          delete instance.attributes.groupUuid;
+          delete instance.attributes.sentAt;
+          delete instance.attributes.timesSent;
+          delete instance.attributes.creatorUuid;
+          delete instance.attributes.token;
+          delete instance.attributes.expiresAt;
+          return;
+        },
+      },
+      indexes: [{
+        fields: ['email', 'groupUuid'],
+        unique: true,
+      }],
       sequelize,
     });
   }
 
   public static relations(): void {
     Invitation.belongsTo(Group, {
+      as: 'group',
       foreignKey: 'groupUuid',
       targetKey: 'uuid',
     });
 
     Invitation.belongsTo(User, {
+      as: 'creator',
       foreignKey: 'creatorUuid',
       targetKey: 'uuid',
     });
   }
 
-  public uuid: string;
+  public readonly uuid: string;
   public groupUuid: string;
   public creatorUuid: string;
   public email: string;

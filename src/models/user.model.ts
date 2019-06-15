@@ -128,6 +128,22 @@ export default class User extends Model {
 
   public getRole: BelongsToGetAssociationMixin<Role>;
   public createRole: BelongsToCreateAssociationMixin<Role>;
+
+  /**
+   * Check if a User is member of a Group.
+   * @param uuid UUID of the Group
+   */
+  public async isMemberGroup(group: Group): Promise<boolean> {
+    return this.hasGroup(group);
+  }
+
+  /**
+   * Check if a User is admin of a Group.
+   * @param uuid UUID of the Group
+   */
+  public async isAdminGroup(group: Group): Promise<boolean> {
+    return this.hasGroupAdmin(group);
+  }
 }
 
 // @Table({

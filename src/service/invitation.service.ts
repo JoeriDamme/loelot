@@ -1,4 +1,5 @@
 import { Moment } from 'moment';
+import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
 import Group from '../models/group.model';
 import Invitation from '../models/invitation.model';
@@ -15,12 +16,12 @@ export interface IInvitationAttributes {
 }
 
 interface IInvitationAssociation {
-  as: string;
-  model: any;
+  query: string;
+  model: Association;
 }
 
 interface IInvitationQueryOptions {
-  include: IInvitationAssociation[];
+  include: Includeable[];
 }
 
 export default class InvitationService {
@@ -94,7 +95,7 @@ export default class InvitationService {
     };
     if (options.include) {
       options.include.split(',').forEach((inclusion: string) => {
-        const relationship: IInvitationAssociation = InvitationService.getIncludeOption(inclusion);
+        const relationship: Includeable = InvitationService.getIncludeOption(inclusion);
         if (relationship) {
           result.include.push(relationship);
         }
@@ -107,15 +108,15 @@ export default class InvitationService {
    * Generate include for query options.
    * @param model
    */
-  private static getIncludeOption(model: string): IInvitationAssociation {
+  private static getIncludeOption(find: string): Includeable {
     const associations: IInvitationAssociation[] = [{
-      as: 'group',
-      model: Group,
+      model: Invitation.associations.group,
+      query: 'group',
     }, {
-      as: 'creator',
-      model: User,
+      model: Invitation.associations.creator,
+      query: 'creator',
     }];
 
-    return associations.filter((association: IInvitationAssociation) => association.as === model)[0];
+    return associations.filter((association: IInvitationAssociation) => association.query === find)[0].model;
   }
 }
