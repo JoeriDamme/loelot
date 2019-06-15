@@ -45,6 +45,11 @@ export default class WishList extends Model {
       rank: {
         allowNull: false,
         type: DataTypes.INTEGER(),
+        validate: {
+          isInt: true,
+          max: 255,
+          min: 1,
+        },
       },
       uuid: {
         defaultValue: Sequelize.fn('uuid_generate_v4'),
@@ -52,17 +57,28 @@ export default class WishList extends Model {
         type: DataTypes.UUID,
       },
     }, {
+      hooks: {
+        beforeBulkUpdate: (instance: any): void => {
+          // not possible to update the following attributes
+          delete instance.attributes.uuid;
+          delete instance.attributes.groupUuid;
+          delete instance.attributes.creatorUuid;
+          return;
+        },
+      },
       sequelize,
     });
   }
 
   public static relations(): void {
     WishList.belongsTo(Group, {
+      as: 'group',
       foreignKey: 'groupUuid',
       targetKey: 'uuid',
     });
 
     WishList.belongsTo(User, {
+      as: 'creator',
       foreignKey: 'creatorUuid',
       targetKey: 'uuid',
     });
