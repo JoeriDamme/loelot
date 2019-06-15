@@ -46,9 +46,9 @@ export default class Role extends Model {
     });
   }
 
-  public uuid: string;
-  public name: string;
-  public permissions: string[];
+  public readonly uuid: string;
+  public readonly name: string;
+  public readonly permissions: string[];
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
