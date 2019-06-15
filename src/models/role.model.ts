@@ -1,6 +1,20 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  Association,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  Model,
+  Sequelize } from 'sequelize';
+import User from './user.model';
 
 export default class Role extends Model {
+  public static associations: {
+    users: Association<User, Role>;
+  };
+
   public static attach(sequelize: Sequelize): void {
     Role.init({
       name: {
@@ -24,11 +38,25 @@ export default class Role extends Model {
     });
   }
 
+  public static relations(): void {
+    Role.hasMany(User, {
+      as: 'users',
+      foreignKey: 'roleUuid',
+      sourceKey: 'uuid',
+    });
+  }
+
   public uuid: string;
   public name: string;
   public permissions: string[];
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+
+  public getUsers: HasManyGetAssociationsMixin<User>;
+  public addUsers: HasManyAddAssociationMixin<User, number>;
+  public hasUser: HasManyHasAssociationMixin<User, number>;
+  public countUsers: HasManyCountAssociationsMixin;
+  public createUser: HasManyCreateAssociationMixin<User>;
 }
 
 // export function init(sequelize: Sequelize): void {

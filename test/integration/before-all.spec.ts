@@ -5,6 +5,7 @@ import config from 'config';
 import { Model, Op, Sequelize } from 'sequelize';
 import * as models from '../../src/models';
 import Role from '../../src/models/role.model';
+import User from '../../src/models/user.model';
 
 // const sequelize: Sequelize = new Sequelize({
 //   database: config.get('database.name') as string,
@@ -34,6 +35,10 @@ before(async () => {
 
     Object.values(models).forEach((model: any) => {
       model.attach(sequelize);
+    });
+
+    Object.values(models).forEach((model: any) => {
+      model.relations();
     });
 
     await sequelize.sync({

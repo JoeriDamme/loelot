@@ -1,8 +1,30 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  Association,
+  BelongsToCreateAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import Group from './group.model';
 import User from './user.model';
 
 export default class Invitation extends Model {
+  public static associations: {
+    group: Association<Invitation, Group>;
+    creator: Association<Invitation, User>;
+  };
+
   public static attach(sequelize: Sequelize): void {
     Invitation.init({
       creatorUuid: {
@@ -51,6 +73,18 @@ export default class Invitation extends Model {
     });
   }
 
+  public static relations(): void {
+    Invitation.belongsTo(Group, {
+      foreignKey: 'groupUuid',
+      targetKey: 'uuid',
+    });
+
+    Invitation.belongsTo(User, {
+      foreignKey: 'creatorUuid',
+      targetKey: 'uuid',
+    });
+  }
+
   public uuid: string;
   public groupUuid: string;
   public creatorUuid: string;
@@ -60,6 +94,12 @@ export default class Invitation extends Model {
   public token: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+
+  public getGroup: BelongsToGetAssociationMixin<Group>;
+  public createGroup: BelongsToCreateAssociationMixin<Group>;
+
+  public getCreator: BelongsToGetAssociationMixin<User>;
+  public createCreator: BelongsToCreateAssociationMixin<User>;
 }
 
 // @DefaultScope({

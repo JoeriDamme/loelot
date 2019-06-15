@@ -7,15 +7,27 @@ export default class GroupUser extends Model {
     GroupUser.init({
       groupUuid: {
         allowNull: false,
+        // references: {
+        //   key: 'uuid',
+        //   model: Group,
+        // },
         type: DataTypes.UUID,
       },
       userUuid: {
         allowNull: false,
+        // references: {
+        //   key: 'uuid',
+        //   model: User,
+        // },
         type: DataTypes.UUID,
       },
     }, {
       sequelize,
     });
+  }
+
+  public static relations(): void {
+    return;
   }
 
   public uuid: string;

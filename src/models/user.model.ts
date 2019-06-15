@@ -1,9 +1,33 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  Association,
+  BelongsToCreateAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import Group from './group.model';
 import GroupUser from './groupuser.model';
 import Role from './role.model';
 
 export default class User extends Model {
+  public static associations: {
+    groupAdmin: Association<Group, User>;
+    groupCreator: Association<Group, User>;
+    groups: Association<Group, User>;
+    role: Association<Role, User>;
+  };
+
   public static attach(sequelize: Sequelize): void {
     User.init({
       displayName: {
@@ -49,6 +73,32 @@ export default class User extends Model {
     });
   }
 
+  public static relations(): void {
+    User.hasMany(Group, {
+      as: 'groupAdmin',
+      foreignKey: 'adminUuid',
+      sourceKey: 'uuid',
+    });
+
+    User.hasMany(Group, {
+      as: 'groupCreator',
+      foreignKey: 'creatorUuid',
+      sourceKey: 'uuid',
+    });
+
+    User.belongsToMany(Group, {
+      as: 'groups',
+      foreignKey: 'userUuid',
+      otherKey: 'groupUuid',
+      through: 'GroupUsers',
+    });
+
+    User.belongsTo(Role, {
+      foreignKey: 'roleUuid',
+      targetKey: 'uuid',
+    });
+  }
+
   public uuid: string;
   public firstName: string;
   public lastName: string;
@@ -57,6 +107,27 @@ export default class User extends Model {
   public roleUuid: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+
+  public getGroupAdmin: HasManyGetAssociationsMixin<Group>;
+  public addGroupAdmin: HasManyAddAssociationMixin<Group, number>;
+  public hasGroupAdmin: HasManyHasAssociationMixin<Group, number>;
+  public countGroupAdmin: HasManyCountAssociationsMixin;
+  public createGroupAdmin: HasManyCreateAssociationMixin<Group>;
+
+  public getGroupCreator: HasManyGetAssociationsMixin<Group>;
+  public addGroupCreator: HasManyAddAssociationMixin<Group, number>;
+  public hasGroupCreator: HasManyHasAssociationMixin<Group, number>;
+  public countGroupCreator: HasManyCountAssociationsMixin;
+  public createGroupCreator: HasManyCreateAssociationMixin<Group>;
+
+  public getGroups: BelongsToManyGetAssociationsMixin<Group>;
+  public addGroup: BelongsToManyAddAssociationMixin<Group, number>;
+  public hasGroup: BelongsToManyHasAssociationMixin<Group, number>;
+  public countGroups: BelongsToManyCountAssociationsMixin;
+  public createGroup: BelongsToManyCreateAssociationMixin<Group>;
+
+  public getRole: BelongsToGetAssociationMixin<Role>;
+  public createRole: BelongsToCreateAssociationMixin<Role>;
 }
 
 // @Table({

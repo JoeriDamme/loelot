@@ -1,8 +1,30 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  Association,
+  BelongsToCreateAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import Group from './group.model';
 import User from './user.model';
 
 export default class WishList extends Model {
+  public static associations: {
+    group: Association<Group, WishList>;
+    creator: Association<User, WishList>;
+  };
+
   public static attach(sequelize: Sequelize): void {
     WishList.init({
       creatorUuid: {
@@ -34,6 +56,18 @@ export default class WishList extends Model {
     });
   }
 
+  public static relations(): void {
+    WishList.belongsTo(Group, {
+      foreignKey: 'groupUuid',
+      targetKey: 'uuid',
+    });
+
+    WishList.belongsTo(User, {
+      foreignKey: 'creatorUuid',
+      targetKey: 'uuid',
+    });
+  }
+
   public uuid: string;
   public creatorUuid: string;
   public description: string;
@@ -41,6 +75,12 @@ export default class WishList extends Model {
   public rank: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+
+  public getGroup: BelongsToGetAssociationMixin<Group>;
+  public createGroup: BelongsToCreateAssociationMixin<Group>;
+
+  public getCreator: BelongsToGetAssociationMixin<User>;
+  public createCreator: BelongsToCreateAssociationMixin<User>;
 }
 
 // @Table({

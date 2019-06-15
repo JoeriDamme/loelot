@@ -1,10 +1,34 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import GroupUser from './groupuser.model';
+import {
+  Association,
+  BelongsToCreateAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import Invitation from './invitation.model';
 import User from './user.model';
 import WishList from './wishlist.model';
 
 export default class Group extends Model {
+  public static associations: {
+    users: Association<User, Group>;
+    admin: Association<User, Group>;
+    creator: Association<User, Group>;
+    wishLists: Association<WishList, Group>;
+    invitations: Association<Invitation, Group>;
+  };
+
   public static attach(sequelize: Sequelize): void {
     Group.init({
       adminUuid: {
@@ -39,12 +63,67 @@ export default class Group extends Model {
     });
   }
 
+  public static relations(): void {
+    Group.belongsTo(User, {
+      foreignKey: 'creatorUuid',
+      targetKey: 'uuid',
+    });
+
+    Group.belongsTo(User, {
+      foreignKey: 'adminUuid',
+      targetKey: 'uuid',
+    });
+
+    Group.belongsToMany(User, {
+      as: 'users',
+      foreignKey: 'groupUuid',
+      otherKey: 'userUuid',
+      through: 'GroupUsers',
+    });
+
+    Group.hasMany(WishList, {
+      as: 'wishLists',
+      foreignKey: 'groupUuid',
+      sourceKey: 'uuid',
+    });
+
+    Group.hasMany(Invitation, {
+      as: 'invitations',
+      foreignKey: 'groupUuid',
+      sourceKey: 'uuid',
+    });
+  }
+
   public uuid: string;
   public creatorUuid: string;
   public adminUuid: string;
   public name: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+
+  public getUsers: BelongsToManyGetAssociationsMixin<User>;
+  public addUser: BelongsToManyAddAssociationMixin<User, number>;
+  public hasUser: BelongsToManyHasAssociationMixin<User, number>;
+  public countUsers: BelongsToManyCountAssociationsMixin;
+  public createUser: BelongsToManyCreateAssociationMixin<User>;
+
+  public getCreator: BelongsToGetAssociationMixin<User>;
+  public createCreator: BelongsToCreateAssociationMixin<User>;
+
+  public getAdmin: BelongsToGetAssociationMixin<User>;
+  public createAdmin: BelongsToCreateAssociationMixin<User>;
+
+  public getWishLists: HasManyGetAssociationsMixin<WishList>;
+  public addWishList: HasManyAddAssociationMixin<WishList, number>;
+  public hasWishList: HasManyHasAssociationMixin<WishList, number>;
+  public countWishLists: HasManyCountAssociationsMixin;
+  public createWishlist: HasManyCreateAssociationMixin<WishList>;
+
+  public getInvitations: HasManyGetAssociationsMixin<Invitation>;
+  public addInvitation: HasManyAddAssociationMixin<Invitation, number>;
+  public hasInvitation: HasManyHasAssociationMixin<Invitation, number>;
+  public countInvitations: HasManyCountAssociationsMixin;
+  public createInvitation: HasManyCreateAssociationMixin<Invitation>;
 }
 // @Table({
 //   timestamps: true,
