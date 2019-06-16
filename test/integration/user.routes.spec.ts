@@ -75,8 +75,11 @@ describe('/api/v1/users', () => {
         firstName: 'John',
         lastName: 'Doe',
       });
+      expect(response.body.role).to.include({
+        name: 'user',
+      });
       expect(response.body).to.have.all.keys('uuid', 'displayName', 'email', 'firstName', 'lastName', 'roleUuid', 'updatedAt',
-      'createdAt');
+      'createdAt', 'role');
     });
 
     it('should reply with forbidden if no permission', async () => {

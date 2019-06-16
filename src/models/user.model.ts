@@ -103,6 +103,7 @@ export default class User extends Model {
     });
 
     User.belongsTo(Role, {
+      as: 'role',
       foreignKey: 'roleUuid',
       targetKey: 'uuid',
     });
@@ -116,6 +117,7 @@ export default class User extends Model {
   public roleUuid: string;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+  public role: Role;
 
   public getGroupAdmin: HasManyGetAssociationsMixin<Group>;
   public addGroupAdmin: HasManyAddAssociationMixin<Group, number>;

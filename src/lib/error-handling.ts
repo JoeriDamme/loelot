@@ -24,7 +24,7 @@ export default class ErrorHandler {
       handledError = new ApplicationError('Something went wrong. Please try again');
     }
 
-    logger.error(`${handledError.status} - ${this.error.message} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
+    logger.error(`${handledError.status} - ${this.error.message} - ${this.error.stack} - ${request.originalUrl} - ${request.method} - ${request.ip}`);
 
     return handledError;
   }

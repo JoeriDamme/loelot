@@ -151,7 +151,11 @@ export default class Authentication {
       secretOrKey: Authentication.getJWTSecret(),
     }, async (jwtPayload: IJWTPayload, callback: any): Promise<VerifiedCallback> => {
       try {
-        const user: User|null = await User.findByPk(jwtPayload.data.uuid);
+        const user: User|null = await User.findByPk(jwtPayload.data.uuid, {
+          include: [
+            User.associations.role,
+          ],
+        });
 
         if (!user) {
           throw new UnauthorizedError('Could not find user in token');
@@ -159,6 +163,7 @@ export default class Authentication {
 
         return callback(null, user);
       } catch (error) {
+        logger.error(`Catched error in jwt strategy: ${error.message}`);
         return callback(error);
       }
     });
