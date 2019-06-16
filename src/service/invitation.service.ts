@@ -1,9 +1,7 @@
 import { Moment } from 'moment';
 import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
-import Group from '../models/group.model';
 import Invitation from '../models/invitation.model';
-import User from '../models/user.model';
 
 export interface IInvitationAttributes {
   creatorUuid: string;

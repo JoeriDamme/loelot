@@ -1,7 +1,5 @@
 import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
-import Group from '../models/group.model';
-import User from '../models/user.model';
 import WishList from '../models/wishlist.model';
 
 interface IWishListAttributes {
