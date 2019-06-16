@@ -12,9 +12,11 @@ export const authenticationRoutes: Router = Router()
       session: false,
     }, async (err: Error, user: any, info: any) => {
       if (err) {
+        logger.error(`passport.authenticate error: ${err.message}`);
         const unauthorized: UnauthorizedError = new UnauthorizedError(err.message);
         return response.status(unauthorized.status).json(unauthorized);
       } else if (info) {
+        logger.error(`passport.authenticate error: ${info.message}`);
         const unauthorized: UnauthorizedError = new UnauthorizedError(info.message);
         return response.status(unauthorized.status).json(unauthorized);
       }

@@ -118,6 +118,7 @@ export default class Authentication {
         });
 
         if (!role) {
+          logger.error('No role found in facebook strategy');
           // this state should never happen
           throw new ApplicationError();
         }
@@ -138,6 +139,7 @@ export default class Authentication {
         const user: User = result[0];
         return done(null, user);
       } catch (error) {
+        logger.error(`Catched error in facebook strategy:${error.message}`);
         return done(error);
       }
     });

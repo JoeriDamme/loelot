@@ -2,14 +2,14 @@ import bluebird from 'bluebird';
 import dotenv from 'dotenv';
 dotenv.config();
 import config from 'config';
-import { Op, Sequelize } from 'sequelize';
+import { Sequelize } from 'sequelize';
+import * as models from '../src/models';
 import Role from '../src/models/role.model';
 
 const sequelize: Sequelize = new Sequelize(config.get('database.name'), process.env.DB_USER as string, process.env.DB_PASS as string, {
   dialect: 'postgres',
   host: process.env.DB_HOST as string,
   logging: false,
-  operatorsAliases: Op,
   port: Number(process.env.DB_PORT),
   timezone: '+01:00',
 });
@@ -51,6 +51,15 @@ class Sync {
   public static async init(): Promise<void> {
     try {
       await sequelize.authenticate();
+      // attach all models to the sequelize instance.
+      Object.values(models).forEach((model: any) => {
+        model.attach(sequelize);
+      });
+
+      // after attaching, setup the relationships.
+      Object.values(models).forEach((model: any) => {
+        model.relations();
+      });
       await sequelize.sync({
         force: true,
       });

@@ -3,10 +3,20 @@ import config from 'config';
 import dotenv from 'dotenv';
 dotenv.config();
 import http from 'http';
+import * as models from '../src/models';
 import App from './app';
 import sequelize from './lib/sequelize';
 
 sequelize.authenticate().then(() => {
+  // attach all models to the sequelize instance.
+  Object.values(models).forEach((model: any) => {
+    model.attach(sequelize);
+  });
+
+  // after attaching, setup the relationships.
+  Object.values(models).forEach((model: any) => {
+    model.relations();
+  });
   const app: App = new App();
   const server: http.Server = app.start();
 

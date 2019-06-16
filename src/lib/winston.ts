@@ -19,7 +19,7 @@ const options: any = {
       messageFormat,
     ),
     handleExceptions: true,
-    json: false,
+    json: true,
     level: 'debug',
   },
   file: {
