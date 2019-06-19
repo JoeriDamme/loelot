@@ -77,13 +77,13 @@ describe(uri, () => {
           adminUuid: user.get('uuid'),
           creatorUuid: user.get('uuid'),
           icon: 'http://www.kek.nl/1.png',
-          name: 'Groep 1',
+          name: 'Groep 1 test',
         },
         {
           adminUuid: user.get('uuid'),
           creatorUuid: user.get('uuid'),
           icon: 'http://www.kek.nl/2.png',
-          name: 'Groep 2',
+          name: 'Groep 2 test',
         },
       ];
 
@@ -127,7 +127,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.imgur.com/test.png',
-        name: 'lol',
+        name: 'lollol',
       });
 
       await resourceGroup.addUser(userNew);
@@ -207,7 +207,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.lol.nl/4.png',
-        name: 'Hey',
+        name: 'Heylol',
       };
 
       const resource: Group = await Group.create(group);
@@ -230,7 +230,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.lol.nl/4.png',
-        name: 'Hey',
+        name: 'Heylol',
       };
 
       const resource: Group = await Group.create(group);
@@ -462,7 +462,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.imgur.com/test.png',
-        name: 'lol',
+        name: 'lolpop',
       };
 
       const resource: Group = await Group.create(group);
@@ -471,7 +471,7 @@ describe(uri, () => {
         adminUuid: 'dc9bdceb-8a0c-437b-ad2a-81e2ffa68807',
         creatorUuid: user.get('uuid'),
         icon: 'http://www.myicons.com/lol.png',
-        name: 'testy',
+        name: 'testywg',
       };
 
       const response: any = await request(expressApp)
@@ -495,7 +495,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.imgur.com/test.png',
-        name: 'lol',
+        name: 'loltopx',
       };
 
       const resource: Group = await Group.create(group);
@@ -574,7 +574,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.imgur.com/test.png',
-        name: 'lol',
+        name: 'lol keppel x',
       };
 
       const resource: Group = await Group.create(group);
@@ -604,7 +604,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.x.com/blob.png',
-        name: 'lol',
+        name: 'lol politie',
       };
 
       const resource: Group = await Group.create(group);
@@ -651,7 +651,7 @@ describe(uri, () => {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
         icon: 'http://www.x.com/egewg.png',
-        name: 'lol',
+        name: 'mooi man',
       };
 
       const resource: Group = await Group.create(group);

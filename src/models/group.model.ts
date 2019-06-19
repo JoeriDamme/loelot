@@ -50,7 +50,7 @@ export default class Group extends Model {
         allowNull: false,
         type: DataTypes.STRING(48),
         validate: {
-          len: [1, 48],
+          len: [6, 48],
         },
       },
       uuid: {
