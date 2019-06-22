@@ -105,6 +105,8 @@ export default class App {
    */
   private setExpressConfiguration(): void {
     this.app.use(cors());
+    this.app.use(bodyParser.urlencoded({extended: true}));
+    this.app.use(bodyParser.json());
     // Share uniqid through app, usefull for logging.
     this.app.use(httpContext.middleware);
     this.app.use((request: Request, response: Response, next: NextFunction) => {
@@ -112,8 +114,7 @@ export default class App {
       return next();
     });
     this.app.use(morgan('combined', morganOption));
-    this.app.use(bodyParser.urlencoded({extended: true}));
-    this.app.use(bodyParser.json());
+
     return;
   }
 
