@@ -105,8 +105,8 @@ export default class App {
    */
   private setExpressConfiguration(): void {
     this.app.use(cors());
-    this.app.use(bodyParser.urlencoded({extended: true}));
-    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+    this.app.use(bodyParser.json({limit: '50mb'}));
     // Share uniqid through app, usefull for logging.
     this.app.use(httpContext.middleware);
     this.app.use((request: Request, response: Response, next: NextFunction) => {
