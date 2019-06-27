@@ -23,6 +23,10 @@ describe(uri, () => {
   let guestToken: string;
   let userRole: Role;
   let guestRole: Role;
+  // tslint:disable-next-line:max-line-length
+  const exampleImage: string = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAATlBMVEX////5+fnl5eX5+fn////j4+Pu7u7u7u7j4+P////h4eHc3Nzc3Nzh4eHv7++3wMK1wMLv7+/5+fmJoaaFoKX5+fn////i5OTi4+T///+cEu6wAAAANklEQVQI12NgwAUYmZiYISwWVjZ2DhYGBgYGBk4ubh5eTogwH7+AIFStkLCIKJQpJi4hidNMAD1WAVVlitx7AAAAAElFTkSuQmCC';
+  // tslint:disable-next-line:max-line-length
+  const differentImage: string = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAABO0lEQVQYlX2PPy9DYRhHz/P2vbdt0H9IJaJqJE0TdGaViFgtPoCBiC/gAxgtNov4AAaJ1SghaYJEQ6JIGlWaqMZt9b2PoWa/6Uwn5yet682a8TO+6wYHvc/b7fjE+go4H23sQuzQBc97rv1Ql9bNTsdEM75EPJotBUAE0gmvz94IYad+a13w0UND/+opznACBLiowPsnbCyDUUXDH0xsbOHYDk0SqjKVVfJZZWleSQ0oZ5fKT+uR7sddxXTfy4MIgHBfE9qBoCpU68L4iBCJDhMdLb1YF7yueZoHlNEk7J+AEdhahesqmGgKMbZo/fQ0SL+t/Q1ri2AMNL8gIoCA6zQKFhEQj9lcm6bLYfvHEYHSDEgkBfJtbVA774kdwEsVjrLJeDEM3uZA6TTKhLHiqbHJBK5ZEeDP8f9+AY5Ud6wVN1mlAAAAAElFTkSuQmCC';
 
   before(async () => {
     const app: App = new App();
@@ -76,13 +80,13 @@ describe(uri, () => {
         {
           adminUuid: user.get('uuid'),
           creatorUuid: user.get('uuid'),
-          icon: 'http://www.kek.nl/1.png',
+          icon: exampleImage,
           name: 'Groep 1 test',
         },
         {
           adminUuid: user.get('uuid'),
           creatorUuid: user.get('uuid'),
-          icon: 'http://www.kek.nl/2.png',
+          icon: exampleImage,
           name: 'Groep 2 test',
         },
       ];
@@ -126,7 +130,7 @@ describe(uri, () => {
       const resourceGroup: Group = await Group.create({
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.imgur.com/test.png',
+        icon: exampleImage,
         name: 'lollol',
       });
 
@@ -206,7 +210,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.lol.nl/4.png',
+        icon: exampleImage,
         name: 'Heylol',
       };
 
@@ -229,7 +233,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.lol.nl/4.png',
+        icon: exampleImage,
         name: 'Heylol',
       };
 
@@ -299,7 +303,7 @@ describe(uri, () => {
   describe('POST /', () => {
     it('should ignore data and uuid ', async () => {
       const group: any = {
-        icon: 'http://www.lol.nl/kek.png',
+        icon: exampleImage,
         name: 'Mijn Groep',
         uuid: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', // should be generated
         what: 'ewgh',
@@ -348,7 +352,7 @@ describe(uri, () => {
       expect(response.status).to.eq(400);
       expect(response.body).to.deep.equal({
         errors: [
-          { message: 'Validation len on icon failed', property: 'icon' },
+          { message: 'Validation base64 string on icon failed', property: 'icon' },
           { message: 'Validation len on name failed', property: 'name' },
         ],
         message: 'Validation error',
@@ -359,7 +363,7 @@ describe(uri, () => {
 
     it('should reply with new resource', async () => {
       const group: any = {
-        icon: 'http://www.test.com/img.png',
+        icon: exampleImage,
         name: 'new group',
       };
 
@@ -395,7 +399,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.keke.com/test.png',
+        icon: exampleImage,
         name: 'the name',
       };
 
@@ -427,7 +431,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.keke.com/test.png',
+        icon: exampleImage,
         name: 'the name',
       };
 
@@ -448,7 +452,7 @@ describe(uri, () => {
       expect(response.status).to.eq(400);
       expect(response.body).to.deep.equal({
         errors: [
-          { message: 'Validation len on icon failed', property: 'icon' },
+          { message: 'Validation base64 string on icon failed', property: 'icon' },
           { message: 'Validation len on name failed', property: 'name' },
         ],
         message: 'Validation error',
@@ -461,7 +465,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.imgur.com/test.png',
+        icon: exampleImage,
         name: 'lolpop',
       };
 
@@ -470,7 +474,7 @@ describe(uri, () => {
       const updateGroup: any = {
         adminUuid: 'dc9bdceb-8a0c-437b-ad2a-81e2ffa68807',
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.myicons.com/lol.png',
+        icon: differentImage,
         name: 'testywg',
       };
 
@@ -494,7 +498,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.imgur.com/test.png',
+        icon: exampleImage,
         name: 'loltopx',
       };
 
@@ -511,7 +515,7 @@ describe(uri, () => {
       const updateGroup: any = {
         adminUuid: updateUser.get('uuid'),
         creatorUuid: updateUser.get('uuid'), // should be ignored
-        icon: 'http://www.imgur.com/new.jpg',
+        icon: differentImage,
         name: 'new lol',
         uuid: '2f9db767-3019-4120-a07e-1d79da925021', // should be ignored
         zork: 'bork', // should be ignored
@@ -543,7 +547,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.keke.com/test.png',
+        icon: exampleImage,
         name: 'the name',
       };
 
@@ -573,7 +577,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.imgur.com/test.png',
+        icon: exampleImage,
         name: 'lol keppel x',
       };
 
@@ -603,7 +607,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.x.com/blob.png',
+        icon: exampleImage,
         name: 'lol politie',
       };
 
@@ -650,7 +654,7 @@ describe(uri, () => {
       const group: any = {
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.x.com/egewg.png',
+        icon: exampleImage,
         name: 'mooi man',
       };
 

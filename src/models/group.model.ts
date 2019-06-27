@@ -16,6 +16,7 @@ import {
   Model,
   Sequelize,
 } from 'sequelize';
+import isBase64 from '../lib/is-base-64';
 import Invitation from './invitation.model';
 import User from './user.model';
 import WishList from './wishlist.model';
@@ -41,9 +42,15 @@ export default class Group extends Model {
       },
       icon: {
         allowNull: false,
-        type: DataTypes.STRING(255),
+        type: DataTypes.TEXT(),
         validate: {
-          len: [1, 255],
+          isImage(value: string): void {
+            const result: boolean = isBase64(value);
+
+            if (!result) {
+              throw new Error('Validation base64 string on icon failed');
+            }
+          },
         },
       },
       name: {
