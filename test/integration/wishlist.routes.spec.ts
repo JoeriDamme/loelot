@@ -20,6 +20,8 @@ describe(uri, () => {
   let differentUser: User;
   let differentToken: string;
   let guestToken: string;
+  // tslint:disable-next-line:max-line-length
+  const exampleImage: string = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAATlBMVEX////5+fnl5eX5+fn////j4+Pu7u7u7u7j4+P////h4eHc3Nzc3Nzh4eHv7++3wMK1wMLv7+/5+fmJoaaFoKX5+fn////i5OTi4+T///+cEu6wAAAANklEQVQI12NgwAUYmZiYISwWVjZ2DhYGBgYGBk4ubh5eTogwH7+AIFStkLCIKJQpJi4hidNMAD1WAVVlitx7AAAAAElFTkSuQmCC';
 
   before(async () => {
     const app: App = new App();
@@ -49,7 +51,7 @@ describe(uri, () => {
     group = await Group.create({
       adminUuid: user.get('uuid'),
       creatorUuid: user.get('uuid'),
-      icon: 'http://www.fyguhj.nl/lol.png',
+      icon: exampleImage,
       name: 'Groep met Jan en zijn vrienden',
     });
 
@@ -222,7 +224,7 @@ describe(uri, () => {
       expect(response.body.group).to.include({
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.fyguhj.nl/lol.png',
+        icon: exampleImage,
         name: 'Groep met Jan en zijn vrienden',
         uuid: group.get('uuid'),
       });

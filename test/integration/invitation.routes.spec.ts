@@ -23,6 +23,8 @@ describe(uri, () => {
   let guest: User;
   let guestToken: string;
   let userRole: Role;
+  // tslint:disable-next-line:max-line-length
+  const exampleImage: string = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAATlBMVEX////5+fnl5eX5+fn////j4+Pu7u7u7u7j4+P////h4eHc3Nzc3Nzh4eHv7++3wMK1wMLv7+/5+fmJoaaFoKX5+fn////i5OTi4+T///+cEu6wAAAANklEQVQI12NgwAUYmZiYISwWVjZ2DhYGBgYGBk4ubh5eTogwH7+AIFStkLCIKJQpJi4hidNMAD1WAVVlitx7AAAAAElFTkSuQmCC';
 
   before(async () => {
     const app: App = new App();
@@ -52,7 +54,7 @@ describe(uri, () => {
     group = await Group.create({
       adminUuid: user.get('uuid'),
       creatorUuid: user.get('uuid'),
-      icon: 'http://www.mooi.nl/kekeke.png',
+      icon: exampleImage,
       name: 'Groep met vrienden',
     });
 
@@ -177,7 +179,7 @@ describe(uri, () => {
       const testGroup: Group = await Group.create({
         adminUuid: testUser.get('uuid'),
         creatorUuid: testUser.get('uuid'),
-        icon: 'http://www.wengweg.nl/ewg.png',
+        icon: exampleImage,
         name: 'Groepie',
       });
 
@@ -328,7 +330,7 @@ describe(uri, () => {
       expect(response.body.group).to.include({
         adminUuid: user.get('uuid'),
         creatorUuid: user.get('uuid'),
-        icon: 'http://www.mooi.nl/kekeke.png',
+        icon: exampleImage,
         name: 'Groep met vrienden',
       });
       expect(response.body.creator).to.include({
