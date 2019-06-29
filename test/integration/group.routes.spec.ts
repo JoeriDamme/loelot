@@ -19,8 +19,10 @@ describe(uri, () => {
   let expressApp: Express.Application;
   let user: User;
   let guest: User;
+  let userNoAccess: User;
   let token: string;
   let guestToken: string;
+  let userNoAccessToken: string;
   let userRole: Role;
   let guestRole: Role;
   // tslint:disable-next-line:max-line-length
@@ -58,6 +60,16 @@ describe(uri, () => {
     });
 
     guestToken = await Authentication.generateJWT(guest);
+
+    userNoAccess = await User.create({
+      displayName: 'I have no access',
+      email: 'kekekekeke@mailinator.com',
+      firstName: 'Papa',
+      lastName: 'John',
+      roleUuid: userRole.get('uuid'),
+    });
+
+    userNoAccessToken = await Authentication.generateJWT(userNoAccess);
   });
 
   describe('GET /', () => {
@@ -216,6 +228,8 @@ describe(uri, () => {
 
       const resource: Group = await Group.create(group);
 
+      await resource.addUser(user);
+
       const response: any = await request(expressApp)
         .get(`${uri}/${resource.get('uuid')}`)
         .set('Authorization', `Bearer ${token}`);
@@ -294,6 +308,30 @@ describe(uri, () => {
       expect(response.status).to.eq(404);
       expect(response.body).to.deep.equal({
         message: 'Invalid format UUID: aabbcc',
+        name: 'ResourceNotFoundError',
+        status: 404,
+      });
+    });
+
+    it('should not be possible to read group if not a member', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: exampleImage,
+        name: 'do not enter',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
+
+      const response: any = await request(expressApp)
+        .get(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${userNoAccessToken}`);
+
+      expect(response.status).to.eq(404);
+      expect(response.body).to.deep.equal({
+        message: `Resource not found with UUID: ${resource.get('uuid')}`,
         name: 'ResourceNotFoundError',
         status: 404,
       });
@@ -395,6 +433,39 @@ describe(uri, () => {
   });
 
   describe('PUT /:uuid', () => {
+    it('should only be updatable by group admins', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: exampleImage,
+        name: 'do not update meeee',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
+      await resource.addUser(userNoAccess); // this user can not update this group
+
+      const updateGroup: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: differentImage,
+        name: 'I am a hacker',
+      };
+
+      const response: any = await request(expressApp)
+        .put(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${userNoAccessToken}`)
+        .send(updateGroup);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
     it('should give error on missing data', async () => {
       const group: any = {
         adminUuid: user.get('uuid'),
@@ -404,6 +475,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const updateGroup: any = {
         adminUuid: user.get('uuid'),
@@ -436,6 +509,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const updateGroup: any = {
         adminUuid: user.get('uuid'),
@@ -471,6 +546,8 @@ describe(uri, () => {
 
       const resource: Group = await Group.create(group);
 
+      await resource.addUser(user);
+
       const updateGroup: any = {
         adminUuid: 'dc9bdceb-8a0c-437b-ad2a-81e2ffa68807',
         creatorUuid: user.get('uuid'),
@@ -503,6 +580,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const updateUser: User = await User.create({
         displayName: 'Jahn Da',
@@ -542,6 +621,35 @@ describe(uri, () => {
   });
 
   describe('PATCH /:uuid', () => {
+    it('should only be patchable by group admins', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: exampleImage,
+        name: 'do not update meeee with patch',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
+      await resource.addUser(userNoAccess); // this user can not update this group
+
+      const patchGroup: any = {
+        name: 'I am a hacker as well',
+      };
+
+      const response: any = await request(expressApp)
+        .patch(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${userNoAccessToken}`)
+        .send(patchGroup);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
 
     it('should give error on invalid data', async () => {
       const group: any = {
@@ -552,6 +660,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const updateGroup: any = {
         name: 'u'.repeat(60),
@@ -583,6 +693,8 @@ describe(uri, () => {
 
       const resource: Group = await Group.create(group);
 
+      await resource.addUser(user);
+
       const updateGroup: any = {
         adminUuid: 'dc9bdceb-8a0c-437b-ad2a-81e2ffa68807',
       };
@@ -612,6 +724,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const patchUser: User = await User.create({
         displayName: 'x y',
@@ -650,6 +764,31 @@ describe(uri, () => {
   });
 
   describe('DELETE /:uuid', () => {
+    it('should only be deletable by group admins', async () => {
+      const group: any = {
+        adminUuid: user.get('uuid'),
+        creatorUuid: user.get('uuid'),
+        icon: exampleImage,
+        name: 'do not delete meee',
+      };
+
+      const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
+      await resource.addUser(userNoAccess); // this user can not update this group
+
+      const response: any = await request(expressApp)
+        .delete(`${uri}/${resource.get('uuid')}`)
+        .set('Authorization', `Bearer ${userNoAccessToken}`);
+
+      expect(response.status).to.eq(401);
+      expect(response.body).to.deep.equal({
+        message: 'Unauthorized',
+        name: 'UnauthorizedError',
+        status: 401,
+      });
+    });
+
     it('should delete group', async () => {
       const group: any = {
         adminUuid: user.get('uuid'),
@@ -659,6 +798,8 @@ describe(uri, () => {
       };
 
       const resource: Group = await Group.create(group);
+
+      await resource.addUser(user);
 
       const response: any = await request(expressApp)
         .delete(`${uri}/${resource.get('uuid')}`)

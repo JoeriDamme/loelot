@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import validateUuid from 'uuid-validate';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
+import UnauthorizedError from '../lib/errors/unauthorized.error';
 import SequelizeUtility from '../lib/sequelize-utility';
 import Group from '../models/group.model';
 import GroupService, { IGroupAttributes } from '../service/group.service';
@@ -72,14 +73,27 @@ export default class GroupController {
   public static async findByPK(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
       if (!validateUuid(request.params.uuid, 4)) {
-        return next(new ResourceNotFoundError(`Invalid format UUID: ${request.params.uuid}`));
+        throw new ResourceNotFoundError(`Invalid format UUID: ${request.params.uuid}`);
       }
 
       const resource: Group|null = await GroupService.findByPk(request.params.uuid, request.query);
 
       if (!resource) {
-        return next(new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`));
+        throw new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`);
       }
+
+      // check if user has access if not role is admin
+      const roleName: string = request.user.get('role').name;
+
+      if (roleName !== 'admin') {
+        const result: boolean = await request.user.isMemberGroup(resource);
+
+        if (!result) {
+          // don't throw unauthorized error, because the 'attacker' knows that the group uuid exists
+          throw new ResourceNotFoundError(`Resource not found with UUID: ${request.params.uuid}`);
+        }
+      }
+
       request.resource = resource;
       return next();
     } catch (error) {
@@ -127,6 +141,30 @@ export default class GroupController {
     try {
       await GroupService.delete(request.resource.get('uuid'));
       return response.status(204).json();
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Middleware to check if a user is an admin of the group.
+   * Query string 'groupUuid' must be set.
+   * @param request
+   * @param response
+   * @param next
+   */
+  public static async isAdminGroup(request: IRequestGroupResource, response: Response, next: NextFunction): Promise<Response|void> {
+    try {
+      const groupUuid: string = request.resource.get('uuid');
+
+      const result: boolean = await request.user.isAdminGroup(groupUuid);
+
+      if (!result) {
+        throw new UnauthorizedError();
+      }
+
+      return next();
+
     } catch (error) {
       return next(error);
     }
