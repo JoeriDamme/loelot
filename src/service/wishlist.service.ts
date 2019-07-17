@@ -1,5 +1,7 @@
-import { Association, Includeable } from 'sequelize/types';
+import { Association, Filterable, Includeable } from 'sequelize/types';
+import { inspect } from 'util';
 import ApplicationError from '../lib/errors/application.error';
+import { logger } from '../lib/winston';
 import WishList from '../models/wishlist.model';
 
 export interface IWishListAttributes {
@@ -16,6 +18,7 @@ interface IWishlistAssociation {
 
 interface IWishListQueryOptions {
   include: Includeable[];
+  where: Filterable['where'];
 }
 
 export default class WishListService {
@@ -33,6 +36,8 @@ export default class WishListService {
    */
   public static async query(options: any): Promise<WishList[]> {
     const queryOptions: IWishListQueryOptions = WishListService.getQueryOptions(options);
+    logger.debug(`wishlist.service.query: argument for FindAll "${JSON.stringify(inspect(queryOptions))}"`);
+
     return WishList.findAll(queryOptions);
   }
 
@@ -86,15 +91,27 @@ export default class WishListService {
   private static getQueryOptions(options: any): IWishListQueryOptions {
     const result: IWishListQueryOptions = {
       include: [],
+      where: {},
     };
-    if (options.include) {
-      options.include.split(',').forEach((inclusion: string) => {
-        const relationship: Includeable = WishListService.getIncludeOption(inclusion);
-        if (relationship) {
-          result.include.push(relationship);
+
+    Object.entries(options).forEach(([key, value]: [string, string]) => {
+      logger.debug(`wishlist.service.query: process getQueryOptions - key: "${key}", value: "${value}"`);
+
+      if (key.toLocaleLowerCase() === 'include') {
+        value.split(',').forEach((inclusion: string) => {
+          const relationship: Includeable = WishListService.getIncludeOption(inclusion);
+          if (relationship) {
+            result.include.push(relationship);
+          }
+        });
+      } else {
+        // keys not handled here should be considered part of the Where clause with operator AND
+        if (result.where) {
+          result.where[key] = value;
         }
-      });
-    }
+      }
+    });
+
     return result;
   }
 

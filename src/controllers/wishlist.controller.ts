@@ -83,6 +83,7 @@ export default class WishListController {
    */
   public static async query(request: IRequestWishListResource, response: Response, next: NextFunction): Promise<Response|void> {
     try {
+      logger.info(`Query WishList with query parameters "${JSON.stringify(request.query)}"`);
       const resources: WishList[] = await WishListService.query(request.query);
       return response.json(resources);
     } catch (error) {
