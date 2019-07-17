@@ -4,8 +4,9 @@ import BadRequestError from '../lib/errors/bad-request.error';
 import ResourceNotFoundError from '../lib/errors/resource-not-found.error';
 import UnauthorizedError from '../lib/errors/unauthorized.error';
 import SequelizeUtility from '../lib/sequelize-utility';
+import { logger } from '../lib/winston';
 import WishList from '../models/wishlist.model';
-import WishListService from '../service/wishlist.service';
+import WishListService, { IWishListAttributes } from '../service/wishlist.service';
 
 interface IRequestWishListResource extends Request {
   resource: WishList;
@@ -26,7 +27,13 @@ export default class WishListController {
         throw new BadRequestError();
       }
 
-      const resource: WishList = await WishList.create(request.body);
+      // add creatorUUid
+      const data: IWishListAttributes = Object.assign(request.body, {
+        creatorUuid: request.user.get('uuid'),
+      });
+
+      const resource: WishList = await WishList.create(data);
+      logger.info(`Created WishList "${resource.get('uuid')}"`);
       return response.status(201).json(resource);
     } catch (error) {
       return next(error);

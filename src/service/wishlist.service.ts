@@ -2,7 +2,7 @@ import { Association, Includeable } from 'sequelize/types';
 import ApplicationError from '../lib/errors/application.error';
 import WishList from '../models/wishlist.model';
 
-interface IWishListAttributes {
+export interface IWishListAttributes {
   creatorUuid: string;
   description: string;
   groupUuid: string;

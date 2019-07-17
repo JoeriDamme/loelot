@@ -131,7 +131,6 @@ describe(uri, () => {
   describe('POST /', () => {
     it('should create a new wist list item', async () => {
       const wishlistPost: any = {
-        creatorUuid: user.get('uuid'),
         description: 'papieren vliegtuig',
         groupUuid: group.get('uuid'),
         rank: 3,
